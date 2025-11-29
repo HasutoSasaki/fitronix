@@ -1,19 +1,20 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: (Initial) → 1.0.0
-Modified Principles: N/A (Initial creation)
+Version Change: 1.0.0 → 1.1.0
+Modified Principles:
+  - Testing Standards (Principle II): Expanded with Kent Beck & 和田卓人 TDD methodologies
 Added Sections:
-  - Core Principles (5 principles: Code Quality, Testing Standards, User Experience Consistency, Performance Requirements, Observability & Monitoring)
-  - Development Workflow
-  - Quality Gates
-  - Governance
+  - TDDの三原則 (Kent Beck)
+  - テスト駆動開発の目的 (和田卓人)
+  - F.I.R.S.T原則
+  - テストの段階 (仮実装・三角測量・明白な実装)
 Templates Status:
   - ✅ plan-template.md: Constitution Check section aligns
   - ✅ spec-template.md: Requirements and Success Criteria sections align
-  - ✅ tasks-template.md: Test-first approach and quality gates align
+  - ✅ tasks-template.md: Test-first approach enhanced with detailed TDD methodology
 Follow-up TODOs: None
-Rationale: Initial constitution focused on code quality, testing standards, UX consistency, and performance as requested.
+Rationale: MINOR version bump - Significant expansion of Testing Standards principle with industry-standard TDD methodologies (Kent Beck's 3 rules, 和田卓人's TDD purpose, F.I.R.S.T principles, test implementation stages).
 -->
 
 # Fitronix Project Constitution
@@ -34,21 +35,38 @@ Rationale: Initial constitution focused on code quality, testing standards, UX c
 
 ### II. Testing Standards (NON-NEGOTIABLE)
 
-**Test-Driven Development (TDD) is mandatory for all features:**
+**Test-Driven Development (TDD) is mandatory for all features (Kent Beck & 和田卓人の手法):**
 
-- **Red-Green-Refactor Cycle**: Write failing tests → Implement minimal code to pass → Refactor for quality.
+- **Red-Green-Refactor Cycle (Kent Beck)**:
+  1. **Red**: Write a failing test that defines desired behavior (テストファースト)
+  2. **Green**: Write the minimal code to make the test pass (仮実装・三角測量・明白な実装)
+  3. **Refactor**: Improve code quality while keeping tests green (リファクタリング)
+- **TDD の三原則 (Kent Beck)**:
+  1. まず失敗する自動テストを書くまでは、プロダクションコードを書かない
+  2. 失敗する自動テストを一度にひとつ以上書かない（コンパイルが通らないのも失敗）
+  3. 現在失敗しているテストをパスさせる以上のプロダクションコードを書かない
+- **テスト駆動開発の目的 (和田卓人)**:
+  - 動作するきれいなコードを書く（"Clean code that works" - Ron Jeffries）
+  - ストレスなく開発を進める（不安をテストに置き換える）
+  - 設計の改善（テスタビリティの向上 = 疎結合・高凝集な設計）
+  - ドキュメントとしてのテスト（実行可能な仕様書）
 - **Test Coverage Requirements**:
   - **Contract Tests**: All public APIs, endpoints, and module interfaces MUST have contract tests validating inputs/outputs.
   - **Integration Tests**: Critical user journeys and inter-service communication MUST be integration tested.
   - **Unit Tests**: Business logic and edge cases MUST be covered by fast, isolated unit tests.
-- **Test Quality**:
-  - Tests MUST be deterministic (same input = same output, no flakiness).
-  - Tests MUST be independent (runnable in any order, no shared state).
-  - Tests MUST be fast (unit tests < 100ms, integration tests < 5s when possible).
-  - Test behavior, not implementation details.
-- **Error Scenarios**: All error conditions, edge cases, and failure modes MUST be tested.
+- **Test Quality (F.I.R.S.T 原則)**:
+  - **Fast**: Tests MUST be fast (unit tests < 100ms, integration tests < 5s when possible).
+  - **Independent**: Tests MUST be independent (runnable in any order, no shared state).
+  - **Repeatable**: Tests MUST be deterministic (same input = same output, no flakiness).
+  - **Self-Validating**: Tests have clear pass/fail outcomes (no manual verification).
+  - **Timely**: Tests are written before production code (test-first).
+- **テストの段階 (和田卓人)**:
+  - **仮実装**: ベタ書きの値を返してテストを通す
+  - **三角測量**: 複数のテストケースから一般化を導く
+  - **明白な実装**: 明らかな実装を一気に書く（慣れてから）
+- **Error Scenarios**: All error conditions, edge cases, and boundary values MUST be tested.
 
-**Rationale**: TDD ensures requirements are clear, code is testable, and regressions are caught immediately. High-quality tests enable confident refactoring and continuous delivery.
+**Rationale**: TDD ensures requirements are clear, code is testable, and regressions are caught immediately. High-quality tests enable confident refactoring and continuous delivery. テストファーストにより、インターフェースを先に考えることで使いやすいAPIが生まれる。
 
 ### III. User Experience Consistency
 
@@ -179,4 +197,4 @@ When constitution violations are unavoidable:
 - Provide evidence that simpler alternatives were evaluated and rejected.
 - Require additional review and approval from senior team members.
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-11-29
+**Version**: 1.1.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-11-29
