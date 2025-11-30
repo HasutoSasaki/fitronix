@@ -25,7 +25,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize React + TypeScript + Vite project with package.json
+- [x] T001 Initialize React + TypeScript + Vite project with package.json
 - [ ] T002 Install core dependencies: React 19, TypeScript 5.7, Vite 6, Capacitor 6
 - [ ] T003 [P] Install Zustand 5 for state management
 - [ ] T004 [P] Install react-window for virtualization
