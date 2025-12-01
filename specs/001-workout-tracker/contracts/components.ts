@@ -5,7 +5,8 @@
  * Ensures type safety and clear component contracts.
  */
 
-import type { WorkoutSession, Exercise, Set, WorkoutExercise, BodyPart } from '../types/models';
+import type { ReactNode } from 'react';
+import type { WorkoutSession, Exercise, Set as WorkoutSet, WorkoutExercise, BodyPart } from '../types/models';
 
 /**
  * Workout Recording Components
@@ -25,17 +26,17 @@ export interface ExerciseInputProps {
 
 export interface SetInputProps {
   exerciseId: string;
-  sets: Set[];
+  sets: WorkoutSet[];
   previousMaxWeight?: number;
-  onAddSet: (set: Omit<Set, 'id' | 'completedAt'>) => void;
+  onAddSet: (set: Omit<WorkoutSet, 'id' | 'completedAt'>) => void;
   onRemoveSet: (setId: string) => void;
-  onUpdateSet: (setId: string, updates: Partial<Set>) => void;
+  onUpdateSet: (setId: string, updates: Partial<WorkoutSet>) => void;
 }
 
 export interface SetRowProps {
-  set: Set;
+  set: WorkoutSet;
   setNumber: number;
-  onUpdate: (updates: Partial<Set>) => void;
+  onUpdate: (updates: Partial<WorkoutSet>) => void;
   onDelete: () => void;
 }
 
@@ -81,7 +82,7 @@ export interface WorkoutDetailScreenProps {
 
 export interface ExerciseDetailCardProps {
   exercise: WorkoutExercise;
-  sets: Set[];
+  sets: WorkoutSet[];
 }
 
 /**
@@ -148,7 +149,7 @@ export interface TabBarProps {
 }
 
 export interface TabItemProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   isActive: boolean;
   onClick: () => void;
@@ -163,7 +164,7 @@ export interface ButtonProps {
   size: 'small' | 'medium' | 'large';
   disabled?: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   'aria-label'?: string;
 }
 
@@ -189,11 +190,11 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export interface EmptyStateProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
   action?: {
