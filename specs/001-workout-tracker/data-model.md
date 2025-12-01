@@ -160,7 +160,7 @@ Reusable exercise definition in user's library.
 | Field | Type | Required | Description | Validation |
 |-------|------|----------|-------------|------------|
 | `id` | string (UUID) | Yes | Unique identifier | UUID v4 format |
-| `name` | string | Yes | Exercise name | 1-100 chars, unique per bodyPart |
+| `name` | string | Yes | Exercise name | 1-100 chars |
 | `bodyPart` | string | Yes | Body part | Valid BodyPart enum |
 | `videoUrl` | string | No | Reference video URL | Valid URL or empty |
 | `createdAt` | string (ISO 8601) | Yes | Creation timestamp | ISO timestamp |
@@ -174,7 +174,7 @@ Reusable exercise definition in user's library.
 - `lastUsed` (descending) - for showing recently used exercises
 
 **Validation Rules**:
-- `name`: Must be unique within the same `bodyPart`
+- `name`: 1-100 characters. Duplicates within same `bodyPart` are allowed but UI should warn user
 - `videoUrl`: Must be valid URL format (http/https) or empty
 
 **Example**:
