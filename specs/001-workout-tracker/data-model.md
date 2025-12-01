@@ -225,7 +225,7 @@ Predefined timer durations for rest between sets.
   { "id": "short", "duration": 60, "name": "短い休憩 (60秒)" },
   { "id": "medium", "duration": 90, "name": "普通の休憩 (90秒)" },
   { "id": "long", "duration": 120, "name": "長い休憩 (120秒)" },
-  { "id": "custom", "duration": 0, "name": "カスタム" }
+  { "id": "custom", "duration": 30, "name": "カスタム" }
 ]
 ```
 
