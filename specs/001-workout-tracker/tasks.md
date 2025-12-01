@@ -26,10 +26,10 @@
 **Purpose**: Project initialization and basic structure
 
 - [x] T001 Initialize React + TypeScript + Vite project with package.json
-- [ ] T002 Install core dependencies: React 19, TypeScript 5.7, Vite 6, Capacitor 6
-- [ ] T003 [P] Install Zustand 5 for state management
-- [ ] T004 [P] Install react-window for virtualization
-- [ ] T005 [P] Install Vitest 3 and React Testing Library 16 for testing
+- [x] T002 Install core dependencies: React 19, TypeScript 5.7, Vite 6, Capacitor 6
+- [x] T003 [P] Install Zustand 5 for state management
+- [x] T004 [P] Install react-window for virtualization
+- [x] T005 [P] Install Vitest 3 and React Testing Library 16 for testing
 - [ ] T006 [P] Configure ESLint and Prettier with constitution standards
 - [ ] T007 Initialize Capacitor with app ID com.fitronix.workouttracker
 - [ ] T008 Add iOS platform with npx cap add ios
