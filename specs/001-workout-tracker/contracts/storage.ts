@@ -100,7 +100,7 @@ export interface IExerciseLibraryStorage {
    * Create a new exercise in library
    * @param exercise - Exercise data (id will be generated if not provided)
    * @returns Promise<Exercise> - Created exercise with generated id
-   * @throws Error if exercise with same name+bodyPart exists
+   * @note Duplicates (same name+bodyPart) are allowed; UI should warn user before calling this
    */
   createExercise(exercise: Omit<Exercise, 'id' | 'createdAt'>): Promise<Exercise>;
 
@@ -190,7 +190,6 @@ export class StorageError extends Error {
 
 export const STORAGE_ERROR_CODES = {
   NOT_FOUND: 'NOT_FOUND',
-  DUPLICATE: 'DUPLICATE',
   VALIDATION: 'VALIDATION',
   UNKNOWN: 'UNKNOWN',
 } as const;
