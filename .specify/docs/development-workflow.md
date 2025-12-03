@@ -27,6 +27,9 @@
 │ → 同じspecブランチに追加                                     │
 │ → 177タスクをフェーズ別に分解                                │
 └─────────────────────────────────────────────────────────────┘
+
+**Note**: フルロードマップ = 177タスク (8+フェーズ)。このドキュメントはMVP配信 (Phase 1-4, 73タスク) にフォーカス。後続フェーズはMVP後に文書化。
+
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ Step 4: Spec PR作成・マージ                                 │
@@ -243,15 +246,15 @@ git pull origin main
 # Phase 1ブランチ作成
 git checkout -b 001-workout-tracker-phase1-setup
 
-# T001から実装開始
-/speckit.implement T001
+# T001から実装開始 (例: spec-kit CLIまたは手動実装)
+# /speckit.implement T001  # 例 - spec-kit CLI利用時
 ```
 
 ### 2. Phase完了後
 
 ```bash
 # すべてのタスクが完了していることを確認
-grep "\[x\]" specs/001-workout-tracker/tasks.md | grep "T001\|T002\|...\|T016"
+grep -E "\[x\].*T0(0[1-9]|1[0-6])" specs/001-workout-tracker/tasks.md
 
 # コミット
 git add .
@@ -272,8 +275,8 @@ git pull origin main
 # 次のPhaseブランチ作成
 git checkout -b 001-workout-tracker-phase2-foundation
 
-# 実装開始
-/speckit.implement T017
+# 実装開始 (例: spec-kit CLIまたは手動実装)
+# /speckit.implement T017  # 例 - spec-kit CLI利用時
 ```
 
 ---
