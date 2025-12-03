@@ -28,7 +28,13 @@
   },
   "include": [
     "src",
-    "tests",
+    "tests"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "ios",
+    "android",
     "specs"
   ]
 }
