@@ -65,6 +65,7 @@ export default tseslint.config(
       'coverage/**',
       'ios/**',
       'android/**',
+      'specs/**',
       '*.config.js',
       '*.config.ts',
     ],
