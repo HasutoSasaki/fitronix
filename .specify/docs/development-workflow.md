@@ -9,7 +9,7 @@
 
 ## 📋 開発フロー概要
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ Step 1: 仕様策定 (/speckit.specify)                         │
 │ → ブランチ: {feature-number}-{feature-name}-spec            │
@@ -52,7 +52,7 @@
 **例**: `001-workout-tracker-spec`
 
 **含まれるファイル**:
-```
+```plaintext
 specs/{feature-number}-{feature-name}/
 ├── spec.md              # /speckit.specify 出力
 ├── plan.md              # /speckit.plan 出力
@@ -78,7 +78,7 @@ specs/{feature-number}-{feature-name}/
 ### 2. Phase別ブランチ (実装専用)
 
 **ブランチ命名規則**:
-```
+```plaintext
 {feature-number}-{feature-name}-phase{N}-{phase-name}
 ```
 
