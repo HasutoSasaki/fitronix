@@ -27,6 +27,14 @@
     "noImplicitOverride": true
   },
   "include": [
-    "src"
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "ios",
+    "android",
+    "specs"
   ]
 }

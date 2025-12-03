@@ -26,21 +26,21 @@
 **Purpose**: Project initialization and basic structure
 
 - [x] T001 Initialize React + TypeScript + Vite project with package.json
-- [ ] T002 Install core dependencies: React 19, TypeScript 5.7, Vite 6, Capacitor 6
-- [ ] T003 [P] Install Zustand 5 for state management
-- [ ] T004 [P] Install react-window for virtualization
-- [ ] T005 [P] Install Vitest 3 and React Testing Library 16 for testing
-- [ ] T006 [P] Configure ESLint and Prettier with constitution standards
-- [ ] T007 Initialize Capacitor with app ID com.fitronix.workouttracker
-- [ ] T008 Add iOS platform with npx cap add ios
-- [ ] T009 Add Android platform with npx cap add android
-- [ ] T010 [P] Install @capacitor/preferences plugin
-- [ ] T011 [P] Install @capacitor/local-notifications plugin
-- [ ] T012 Create src/ directory structure (components/, hooks/, stores/, services/, types/, utils/)
-- [ ] T013 Create tests/ directory structure (unit/, integration/, contract/, setup/)
-- [ ] T014 Configure Vitest in vitest.config.ts
-- [ ] T015 [P] Setup test mocks for Capacitor plugins in tests/setup/mocks.ts
-- [ ] T016 [P] Configure TypeScript strict mode in tsconfig.json
+- [x] T002 Install core dependencies: React 19, TypeScript 5.7, Vite 6, Capacitor 7
+- [x] T003 [P] Install Zustand 5 for state management
+- [x] T004 [P] Install react-window for virtualization
+- [x] T005 [P] Install Vitest 3 and React Testing Library 16 for testing
+- [x] T006 [P] Configure ESLint and Prettier with constitution standards
+- [x] T007 Initialize Capacitor with app ID com.fitronix.workouttracker
+- [x] T008 Add iOS platform with npx cap add ios
+- [x] T009 Add Android platform with npx cap add android
+- [x] T010 [P] Install @capacitor/preferences plugin
+- [x] T011 [P] Install @capacitor/local-notifications plugin
+- [x] T012 Create src/ directory structure (components/, hooks/, stores/, services/, types/, utils/)
+- [x] T013 Create tests/ directory structure (unit/, integration/, contract/, setup/)
+- [x] T014 Configure Vitest in vitest.config.ts
+- [x] T015 [P] Setup test mocks for Capacitor plugins in tests/setup/mocks.ts
+- [x] T016 [P] Configure TypeScript strict mode in tsconfig.json
 
 ---
 
