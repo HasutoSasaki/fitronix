@@ -123,9 +123,13 @@ class DatabaseManager {
    */
   public async close(): Promise<void> {
     if (this.db) {
-      await this.db.close();
-      this.db = null;
-      this.isInitialized = false;
+      try {
+        await this.db.close();
+      } finally {
+        this.db = null;
+        this.isInitialized = false;
+        this.initializationPromise = null;
+      }
     }
   }
 
