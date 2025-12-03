@@ -3,7 +3,7 @@
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the template reference.
 
 ## Summary
 
@@ -11,21 +11,15 @@
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript 5.7.2
+**Primary Dependencies**: React 19.0.0, Capacitor 7.4.0, @capacitor-community/sqlite 7.0.2, uuid 13.0.0
+**Storage**: SQLite via @capacitor-community/sqlite plugin
+**Testing**: Vitest 3 + React Testing Library 16 + contract tests
+**Target Platform**: Mobile (iOS 15+, Android 12+ via Capacitor)
+**Project Type**: Mobile
+**Performance Goals**: <1.5s FCP, <3s TTI, <100ms DB queries (p95), 60fps UI
+**Constraints**: Offline-first, <512MB memory, WCAG 2.1 AA compliant
+**Scale/Scope**: Single-user, 100-500 workout sessions, 10-50 exercises in library
 
 ## Constitution Check
 
