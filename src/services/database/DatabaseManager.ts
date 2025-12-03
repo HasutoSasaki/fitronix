@@ -16,6 +16,7 @@ class DatabaseManager {
   private db: SQLiteDBConnection | null = null;
   private dbName: string = 'fitronix_workout_tracker';
   private isInitialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
 
   private constructor() {
     // Private constructor for singleton
@@ -96,8 +97,18 @@ class DatabaseManager {
    */
   public async getConnection(): Promise<SQLiteDBConnection> {
     if (!this.db || !this.isInitialized) {
-      // Auto-initialize if not already done
-      await this.initialize();
+      // 既に初期化が進行中なら、その完了を待つ
+      if (this.initializationPromise) {
+        await this.initializationPromise;
+      } else {
+        // 初期化プロミスを保存して重複実行を防止
+        this.initializationPromise = this.initialize();
+        try {
+          await this.initializationPromise;
+        } finally {
+          this.initializationPromise = null;
+        }
+      }
     }
 
     if (!this.db) {
@@ -154,9 +165,18 @@ class DatabaseManager {
    * Import database from JSON (for restore)
    */
   public async importFromJson(jsonString: string): Promise<void> {
-    const jsonObject = JSON.parse(jsonString);
+    try {
+      // JSON の妥当性チェック
+      JSON.parse(jsonString);
 
-    await CapacitorSQLite.importFromJson(jsonObject);
+      // CapacitorSQLite の期待する形式で渡す
+      await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error(`Invalid JSON format: ${error.message}`);
+      }
+      throw new Error(`Failed to import database: ${error}`);
+    }
   }
 
   /**
