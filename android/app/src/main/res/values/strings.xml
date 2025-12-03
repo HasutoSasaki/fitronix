@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">fitronix</string>
+    <string name="title_activity_main">fitronix</string>
+    <string name="package_name">com.fitronix.workouttracker</string>
+    <string name="custom_url_scheme">com.fitronix.workouttracker</string>
+</resources>
