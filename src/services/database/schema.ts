@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS workout_exercises (
   bodyPart TEXT NOT NULL,
   maxWeight REAL,
   "order" INTEGER NOT NULL,
-  FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
+  FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE,
+  FOREIGN KEY (exerciseId) REFERENCES exercises(id) ON DELETE SET NULL
 );
 
 -- Sets
