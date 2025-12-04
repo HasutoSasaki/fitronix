@@ -109,12 +109,12 @@ Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) 
 ```text
 specs/002-workout-tracker-sqlite-migration/
 ├── spec.md                     # Feature specification (completed)
-├── plan.md                     # This file (implementation plan)
-├── research.md                 # Technology research (to be created)
-├── data-model.md               # Database schema documentation (to be created)
-├── contracts/                  # Storage interface contracts (to be created)
+├── plan.md                     # This file (implementation plan - completed)
+├── research.md                 # Technology research (completed)
+├── data-model.md               # Database schema documentation (completed)
+├── contracts/                  # Storage interface contracts (completed)
 │   └── storage.ts              # IWorkoutSessionStorage, IExerciseLibraryStorage
-├── quickstart.md               # Developer onboarding guide (to be created)
+├── quickstart.md               # Developer onboarding guide (completed)
 └── checklists/
     └── requirements.md         # Spec quality checklist (completed)
 ```

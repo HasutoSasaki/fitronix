@@ -174,11 +174,13 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 workout_sessions (id, date, totalTime, createdAt, updatedAt)
 workout_exercises (
   id, sessionId,
-  exerciseId,  -- Foreign key to library (optional)
+  exerciseId,  -- Optional FK to library (ON DELETE SET NULL)
   exerciseName,  -- Denormalized for fast reads
   bodyPart,      -- Denormalized for fast reads
   maxWeight,     -- Cached calculation
-  order
+  order,
+  FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE,
+  FOREIGN KEY (exerciseId) REFERENCES exercises(id) ON DELETE SET NULL
 )
 sets (id, exerciseId, weight, reps, completedAt, order)
 exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
@@ -187,7 +189,8 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 **Pros**:
 - ✅ Fast reads - no joins required for "show session history"
 - ✅ exerciseName and bodyPart stored directly in workout_exercises
-- ✅ Still maintains referential integrity via foreign keys
+- ✅ Maintains referential integrity: sessionId (CASCADE), exerciseId (SET NULL)
+- ✅ exerciseId FK ensures library references are valid when present
 - ✅ Denormalization limited to frequently-read fields
 
 **Cons**:
@@ -248,7 +251,7 @@ Which indexes should we create to optimize common query patterns without over-in
 **Rationale**:
 - **Not Too Many**: 7 indexes is reasonable (each index adds ~10% write overhead)
 - **Covers All Query Patterns**: Every query in the app benefits from at least one index
-- **COLLATE NOCASE**: Case-insensitive search for Japanese and English exercise names
+- **COLLATE NOCASE**: Case-insensitive matching for ASCII/English only (e.g., "Bench Press" matches "bench press"). Japanese and other non-ASCII scripts have no case concept and are compared as-is.
 - **DESC Ordering**: Explicit DESC for date-based indexes (most recent first)
 
 **Index Effectiveness Verification**:

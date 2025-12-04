@@ -282,9 +282,9 @@ describe('Contract: IExerciseLibraryStorage', () => {
       const fetched1 = await storage.getExerciseById(ex1.id);
       const fetched2 = await storage.getExerciseById(ex2.id);
 
-      // At least one should be updated
-      const updated = [fetched1?.lastUsed, fetched2?.lastUsed].filter(Boolean);
-      expect(updated.length).toBeGreaterThanOrEqual(1);
+      // Exactly one exercise should be updated (the first created one, ex1)
+      expect(fetched1?.lastUsed).toBeTruthy();
+      expect(fetched2?.lastUsed).toBeUndefined();
     });
   });
 

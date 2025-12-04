@@ -215,7 +215,8 @@ Test Files  1 passed (1)
 
 1. **Download**: [DB Browser for SQLite](https://sqlitebrowser.org/)
 2. **Locate Database File**:
-   - **iOS Simulator**: `~/Library/Developer/CoreSimulator/Devices/<DEVICE_ID>/data/Containers/Data/Application/<APP_ID>/Documents/databases/fitronix_workout_tracker.db`
+   - **iOS Simulator**: `~/Library/Developer/CoreSimulator/Devices/<DEVICE_ID>/data/Containers/Data/Application/<APP_ID>/Library/LocalDatabase/fitronix_workout_tracker.db`
+     - **Note**: Path is determined by Capacitor config `iosDatabaseLocation: 'Library/LocalDatabase'`
    - **Android Emulator**: Use `adb pull /data/data/com.fitronix.workouttracker/databases/fitronix_workout_tracker.db`
 3. **Open in DB Browser**: File → Open Database → Select file
 4. **Browse Data**: Navigate to "Browse Data" tab, select table
@@ -224,7 +225,8 @@ Test Files  1 passed (1)
 
 ```bash
 # macOS/Linux - locate database file first
-cd ~/Library/Developer/CoreSimulator/Devices/<DEVICE_ID>/data/Containers/Data/Application/<APP_ID>/Documents/databases/
+# Note: iOS path uses Library/LocalDatabase (set in Capacitor config)
+cd ~/Library/Developer/CoreSimulator/Devices/<DEVICE_ID>/data/Containers/Data/Application/<APP_ID>/Library/LocalDatabase/
 
 # Open database
 sqlite3 fitronix_workout_tracker.db

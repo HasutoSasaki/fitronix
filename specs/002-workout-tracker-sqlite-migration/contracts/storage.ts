@@ -138,12 +138,18 @@ export interface IWorkoutSessionStorage {
    * Searches across all past sessions to find the highest weight
    * ever lifted for this exercise.
    *
-   * @param exerciseName - Exercise name (case-insensitive)
+   * **Implementation Requirement**: Implementations MUST perform case-insensitive
+   * comparison for ASCII/English characters (e.g., "Bench Press" matches "bench press").
+   * For SQLite implementations, use `COLLATE NOCASE` in queries. Note that Japanese
+   * and other non-ASCII scripts are compared as-is (they have no case concept).
+   *
+   * @param exerciseName - Exercise name (case-insensitive for ASCII/English)
    * @returns Max weight in kg, or null if no history
    *
    * @example
    * const maxWeight = await storage.getPreviousMaxWeight('ベンチプレス');
    * // Returns: 82.5 (if user's previous max was 82.5kg)
+   * // Also matches: 'べんちぷれす' (exact match), but not different case for Japanese
    */
   getPreviousMaxWeight(exerciseName: string): Promise<number | null>;
 }
