@@ -12,7 +12,6 @@ import type {
 import type {
   WorkoutSession,
   Exercise,
-  BodyPart,
 } from '../types/models';
 
 /**
@@ -123,11 +122,11 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       // Generate UUIDs for exercises and sets
-      exercises: session.exercises.map((ex, exIdx) => ({
+      exercises: session.exercises.map((ex) => ({
         ...ex,
         id: this.generateUUID(),
         sessionId: '', // Will be filled below
-        sets: ex.sets.map((set, setIdx) => ({
+        sets: ex.sets.map((set) => ({
           ...set,
           id: this.generateUUID(),
           exerciseId: '', // Will be filled below
@@ -162,11 +161,21 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       throw new Error(`Session not found: ${id}`);
     }
 
+    // Ensure updatedAt is different from original (for fast sequential updates)
+    let newUpdatedAt = new Date().toISOString();
+    if (newUpdatedAt === sessions[index]!.updatedAt) {
+      // If same millisecond, add 1ms to ensure difference
+      const date = new Date();
+      date.setMilliseconds(date.getMilliseconds() + 1);
+      newUpdatedAt = date.toISOString();
+    }
+
     const updatedSession: WorkoutSession = {
       ...sessions[index]!,
       ...updates,
       id, // Preserve ID
-      updatedAt: new Date().toISOString(),
+      createdAt: sessions[index]!.createdAt, // Preserve createdAt
+      updatedAt: newUpdatedAt,
     };
 
     sessions[index] = updatedSession;
@@ -308,15 +317,17 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     const exercises = await this.getAllExercises();
     const now = new Date().toISOString();
 
-    // Find exercise by name and update lastUsed
-    const updated = exercises.map(e => {
-      if (e.name.toLowerCase() === exerciseName.toLowerCase()) {
+    // Find exercise by name and update lastUsed (only first match)
+    let updated = false;
+    const result = exercises.map(e => {
+      if (!updated && e.name.toLowerCase() === exerciseName.toLowerCase()) {
+        updated = true;
         return { ...e, lastUsed: now };
       }
       return e;
     });
 
-    await this.prefsStorage.set(this.STORAGE_KEY, updated);
+    await this.prefsStorage.set(this.STORAGE_KEY, result);
   }
 
   /**
