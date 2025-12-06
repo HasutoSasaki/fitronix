@@ -277,6 +277,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       ...exercises[index]!,
       ...updates,
       id, // Preserve ID
+      createdAt: exercises[index]!.createdAt, // Preserve createdAt
     };
 
     exercises[index] = updatedExercise;
