@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 import './mocks';
+import { Preferences } from '@capacitor/preferences';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -15,4 +16,9 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+// Clear all Preferences storage before each test to prevent test interference
+beforeEach(async () => {
+  await Preferences.clear();
 });
