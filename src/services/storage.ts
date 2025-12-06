@@ -1,6 +1,7 @@
 /**
  * Storage Layer Implementations
  * Phase 2: Storage layer with TDD approach (仮実装 → 三角測量 → 明白な実装)
+ * Refactored: T031 - Improved error handling and code reuse
  */
 
 import { Preferences } from '@capacitor/preferences';
@@ -13,6 +14,7 @@ import type {
   WorkoutSession,
   Exercise,
 } from '../types/models';
+import { generateUUID, getCurrentTimestamp, getUpdatedTimestamp } from '../utils/storage';
 
 /**
  * PreferencesStorage - Key-value storage using Capacitor Preferences
@@ -116,19 +118,20 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     const sessions = await this.getAllSessions();
 
     // Generate UUID and timestamps
+    const now = getCurrentTimestamp();
     const newSession: WorkoutSession = {
       ...session,
-      id: this.generateUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id: generateUUID(),
+      createdAt: now,
+      updatedAt: now,
       // Generate UUIDs for exercises and sets
       exercises: session.exercises.map((ex) => ({
         ...ex,
-        id: this.generateUUID(),
+        id: generateUUID(),
         sessionId: '', // Will be filled below
         sets: ex.sets.map((set) => ({
           ...set,
-          id: this.generateUUID(),
+          id: generateUUID(),
           exerciseId: '', // Will be filled below
         })),
       })),
@@ -161,21 +164,12 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       throw new Error(`Session not found: ${id}`);
     }
 
-    // Ensure updatedAt is different from original (for fast sequential updates)
-    let newUpdatedAt = new Date().toISOString();
-    if (newUpdatedAt === sessions[index]!.updatedAt) {
-      // If same millisecond, add 1ms to ensure difference
-      const date = new Date();
-      date.setMilliseconds(date.getMilliseconds() + 1);
-      newUpdatedAt = date.toISOString();
-    }
-
     const updatedSession: WorkoutSession = {
       ...sessions[index]!,
       ...updates,
       id, // Preserve ID
       createdAt: sessions[index]!.createdAt, // Preserve createdAt
-      updatedAt: newUpdatedAt,
+      updatedAt: getUpdatedTimestamp(sessions[index]!.updatedAt),
     };
 
     sessions[index] = updatedSession;
@@ -212,17 +206,6 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     }
 
     return maxWeight;
-  }
-
-  /**
-   * Generate UUID v4 (simple implementation)
-   */
-  private generateUUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
   }
 }
 
@@ -269,8 +252,8 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     const newExercise: Exercise = {
       ...exercise,
-      id: this.generateUUID(),
-      createdAt: new Date().toISOString(),
+      id: generateUUID(),
+      createdAt: getCurrentTimestamp(),
     };
 
     exercises.push(newExercise);
@@ -328,16 +311,5 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     });
 
     await this.prefsStorage.set(this.STORAGE_KEY, result);
-  }
-
-  /**
-   * Generate UUID v4 (simple implementation)
-   */
-  private generateUUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
   }
 }
