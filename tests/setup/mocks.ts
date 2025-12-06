@@ -28,6 +28,50 @@ vi.mock('@capacitor/preferences', () => ({
   },
 }));
 
+// Mock @capacitor-community/sqlite for in-memory testing
+let mockConnection: any = null;
+let mockDbData: Map<string, any[]> = new Map();
+
+const createMockConnection = () => ({
+  execute: vi.fn().mockImplementation(async (sql: string) => {
+    // Handle table creation
+    if (sql.includes('CREATE TABLE')) {
+      return { changes: { changes: 0 } };
+    }
+    // Handle INSERT statements
+    if (sql.toUpperCase().includes('INSERT INTO schema_version')) {
+      return { changes: { changes: 1 } };
+    }
+    return { changes: { changes: 0 } };
+  }),
+  query: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+    // Simple mock query responses
+    return { values: [] };
+  }),
+  run: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+    return { changes: { changes: 1, lastId: 1 } };
+  }),
+  close: vi.fn().mockResolvedValue(undefined),
+  isDBOpen: vi.fn().mockResolvedValue({ result: true }),
+});
+
+vi.mock('@capacitor-community/sqlite', () => ({
+  CapacitorSQLite: {
+    createConnection: vi.fn().mockImplementation(async (options: any) => {
+      if (!mockConnection) {
+        mockConnection = createMockConnection();
+      }
+      return mockConnection;
+    }),
+    closeConnection: vi.fn().mockImplementation(async () => {
+      mockConnection = null;
+      mockDbData.clear();
+      return undefined;
+    }),
+    isConnection: vi.fn().mockResolvedValue({ result: true }),
+  },
+}));
+
 // Mock Capacitor Local Notifications API
 vi.mock('@capacitor/local-notifications', () => ({
   LocalNotifications: {
