@@ -36,10 +36,10 @@
 
 **⚠️ CRITICAL**: SQLite mock setup must be complete before implementation begins
 
-- [ ] T004 Setup SQLite mock for contract tests in tests/setup/mocks.ts
-- [ ] T005 Update test setup to support both Preferences and SQLite backends in tests/setup/setup.ts
-- [ ] T006 Create vitest.contract-sqlite.config.ts for SQLite-specific contract tests
-- [ ] T006.5 **TDD: Run existing contract tests with SQLite mock → verify they FAIL (RED phase)** before implementation begins
+- [X] T004 Setup SQLite mock for contract tests in tests/setup/mocks.ts
+- [X] T005 Update test setup to support both Preferences and SQLite backends in tests/setup/setup.ts
+- [X] T006 Create vitest.contract-sqlite.config.ts for SQLite-specific contract tests
+- [X] T006.5 **TDD: Run existing contract tests with SQLite mock → verify they FAIL (RED phase)** before implementation begins
 
 **Checkpoint**: Contract test infrastructure ready, tests verified RED (TDD cycle enforced)
 
@@ -53,23 +53,23 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Create SqliteWorkoutSessionStorage class in src/services/database/storage.ts implementing IWorkoutSessionStorage
-- [ ] T008 [P] [US1] Create SqliteExerciseLibraryStorage class in src/services/database/storage.ts implementing IExerciseLibraryStorage
-- [ ] T009 [US1] Implement getAllSessions() with indexed query (idx_workout_sessions_date)
-- [ ] T010 [US1] Implement getSessionById() with parameterized query
-- [ ] T011 [US1] Implement getSessionsByDateRange() with indexed date filtering
-- [ ] T012 [US1] Implement createSession() with transaction and foreign key generation
-- [ ] T013 [US1] Implement updateSession() preserving createdAt and using getUpdatedTimestamp()
-- [ ] T014 [US1] Implement deleteSession() verifying CASCADE DELETE behavior
-- [ ] T015 [US1] Implement getPreviousMaxWeight() with exercise name query
-- [ ] T016 [P] [US1] Implement getAllExercises() from exercise library
-- [ ] T017 [P] [US1] Implement getExercisesByBodyPart() with indexed filtering
-- [ ] T018 [P] [US1] Implement getExerciseById() for library lookups
-- [ ] T019 [P] [US1] Implement searchExercises() with COLLATE NOCASE
-- [ ] T020 [US1] Implement createExercise() for library management
-- [ ] T021 [US1] Implement updateExercise() preserving createdAt
-- [ ] T022 [US1] Implement deleteExercise() from library
-- [ ] T023 [US1] Implement markExerciseAsUsed() updating lastUsed timestamp
+- [X] T007 [P] [US1] Create SqliteWorkoutSessionStorage class in src/services/database/storage.ts implementing IWorkoutSessionStorage
+- [X] T008 [P] [US1] Create SqliteExerciseLibraryStorage class in src/services/database/storage.ts implementing IExerciseLibraryStorage
+- [X] T009 [US1] Implement getAllSessions() with indexed query (idx_workout_sessions_date)
+- [X] T010 [US1] Implement getSessionById() with parameterized query
+- [X] T011 [US1] Implement getSessionsByDateRange() with indexed date filtering
+- [X] T012 [US1] Implement createSession() with transaction and foreign key generation
+- [X] T013 [US1] Implement updateSession() preserving createdAt and using getUpdatedTimestamp()
+- [X] T014 [US1] Implement deleteSession() verifying CASCADE DELETE behavior
+- [X] T015 [US1] Implement getPreviousMaxWeight() with exercise name query
+- [X] T016 [P] [US1] Implement getAllExercises() from exercise library
+- [X] T017 [P] [US1] Implement getExercisesByBodyPart() with indexed filtering
+- [X] T018 [P] [US1] Implement getExerciseById() for library lookups
+- [X] T019 [P] [US1] Implement searchExercises() with COLLATE NOCASE
+- [X] T020 [US1] Implement createExercise() for library management
+- [X] T021 [US1] Implement updateExercise() preserving createdAt
+- [X] T022 [US1] Implement deleteExercise() from library
+- [X] T023 [US1] Implement markExerciseAsUsed() updating lastUsed timestamp
 
 **Checkpoint**: **TDD: All contract tests pass (GREEN phase)** - Same 67 tests as Preferences, RED→GREEN cycle complete
 
