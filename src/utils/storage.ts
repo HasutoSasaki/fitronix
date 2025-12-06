@@ -25,7 +25,7 @@ export function getCurrentTimestamp(): string {
 
 /**
  * Ensure a new timestamp is different from an old one
- * If they're the same millisecond, adds 1ms to guarantee difference
+ * If they're the same millisecond, adds 1ms to the old timestamp
  *
  * @param oldTimestamp - Previous timestamp to compare against
  * @returns New timestamp guaranteed to be different
@@ -34,7 +34,16 @@ export function getUpdatedTimestamp(oldTimestamp: string): string {
   const newTimestamp = getCurrentTimestamp();
 
   if (newTimestamp === oldTimestamp) {
-    const date = new Date();
+    // Parse oldTimestamp and add 1ms to ensure difference
+    const date = new Date(oldTimestamp);
+
+    // Fallback to current timestamp if oldTimestamp is invalid
+    if (isNaN(date.getTime())) {
+      const fallback = new Date();
+      fallback.setMilliseconds(fallback.getMilliseconds() + 1);
+      return fallback.toISOString();
+    }
+
     date.setMilliseconds(date.getMilliseconds() + 1);
     return date.toISOString();
   }
