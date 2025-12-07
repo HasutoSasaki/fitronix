@@ -14,8 +14,8 @@ import {
 class DatabaseManager {
   private static instance: DatabaseManager;
   private db: SQLiteDBConnection | null = null;
-  private dbName: string = 'fitronix_workout_tracker';
-  private isInitialized: boolean = false;
+  private dbName = 'fitronix_workout_tracker';
+  private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
 
   private constructor() {
@@ -167,19 +167,50 @@ class DatabaseManager {
 
   /**
    * Import database from JSON (for restore)
+   *
+   * Performs import within a transaction to ensure atomicity.
+   * If import fails, all changes are rolled back to prevent partial data corruption.
+   *
+   * @param jsonString - JSON string exported from exportToJson()
+   * @throws Error if JSON is invalid or import operation fails
+   *
+   * @example
+   * ```typescript
+   * const db = DatabaseManager.getInstance();
+   * const backup = await db.exportToJson();
+   * // ... later restore ...
+   * await db.importFromJson(backup);
+   * ```
    */
   public async importFromJson(jsonString: string): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
     try {
-      // JSON の妥当性チェック
+      // Validate JSON format before attempting import
       JSON.parse(jsonString);
 
-      // CapacitorSQLite の期待する形式で渡す
-      await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
+      // Begin transaction for atomic import
+      await this.db.execute('BEGIN TRANSACTION');
+
+      try {
+        // Import data using CapacitorSQLite API
+        await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
+
+        // Commit transaction on success
+        await this.db.execute('COMMIT');
+      } catch (importError) {
+        // Rollback transaction on failure to prevent partial import
+        await this.db.execute('ROLLBACK');
+        throw importError;
+      }
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new Error(`Invalid JSON format: ${error.message}`);
       }
-      throw new Error(`Failed to import database: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to import database: ${errorMessage}`);
     }
   }
 
@@ -196,7 +227,8 @@ class DatabaseManager {
     );
 
     if (result.values && result.values.length > 0) {
-      return result.values[0]?.version as number;
+      const row = result.values[0] as { version: number };
+      return row.version;
     }
 
     return 0;
