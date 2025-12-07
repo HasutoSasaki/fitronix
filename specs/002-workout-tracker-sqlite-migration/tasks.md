@@ -133,8 +133,8 @@
 
 **Purpose**: Final touches and cross-cutting concerns
 
-- [ ] T039 Add JSDoc comments to all public methods in SqliteWorkoutSessionStorage
-- [ ] T040 Add JSDoc comments to all public methods in SqliteExerciseLibraryStorage
+- [X] T039 Add JSDoc comments to all public methods in SqliteWorkoutSessionStorage
+- [X] T040 Add JSDoc comments to all public methods in SqliteExerciseLibraryStorage
 - [ ] T041 Update README with SQLite migration notes and usage examples
 - [ ] T042 Run full test suite (npm test) and verify 100% pass rate
 - [ ] T043 Verify no console errors or warnings in test output

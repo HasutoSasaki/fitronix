@@ -16,6 +16,20 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     return await DatabaseManager.getConnection();
   }
 
+  /**
+   * Get all exercises from library sorted by last used (most recent first)
+   *
+   * Uses indexed query on `idx_exercises_lastUsed` for performance.
+   *
+   * @returns Promise<Exercise[]> - All library exercises
+   *
+   * @example
+   * ```typescript
+   * const storage = new ExerciseLibraryStorage();
+   * const exercises = await storage.getAllExercises();
+   * console.log(exercises[0].name); // Most recently used exercise
+   * ```
+   */
   async getAllExercises(): Promise<Exercise[]> {
     const db = await this.getDb();
 
@@ -37,6 +51,12 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     }));
   }
 
+  /**
+   * Get a single exercise by ID
+   *
+   * @param id - Exercise UUID
+   * @returns Promise<Exercise | null> - Exercise or null if not found
+   */
   async getExerciseById(id: string): Promise<Exercise | null> {
     const db = await this.getDb();
 
@@ -60,6 +80,14 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     };
   }
 
+  /**
+   * Get exercises filtered by body part
+   *
+   * Uses indexed query on `idx_exercises_bodyPart` for performance.
+   *
+   * @param bodyPart - Body part to filter by (e.g., '胸', '背中')
+   * @returns Promise<Exercise[]> - Exercises for specified body part
+   */
   async getExercisesByBodyPart(bodyPart: BodyPart): Promise<Exercise[]> {
     const db = await this.getDb();
 
@@ -104,6 +132,23 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     }));
   }
 
+  /**
+   * Create a new exercise in library
+   *
+   * Auto-generates UUID and sets createdAt timestamp.
+   *
+   * @param data - Exercise data without id, createdAt, lastUsed
+   * @returns Promise<Exercise> - Created exercise with generated fields
+   *
+   * @example
+   * ```typescript
+   * const exercise = await storage.createExercise({
+   *   name: 'デッドリフト',
+   *   bodyPart: '背中',
+   *   videoUrl: 'https://youtube.com/...'
+   * });
+   * ```
+   */
   async createExercise(
     data: Omit<Exercise, 'id' | 'createdAt' | 'lastUsed'>
   ): Promise<Exercise> {
@@ -126,6 +171,16 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     return created;
   }
 
+  /**
+   * Update an existing exercise in library
+   *
+   * Only updates provided fields. Preserves createdAt.
+   *
+   * @param id - Exercise UUID
+   * @param data - Partial exercise data to update
+   * @returns Promise<Exercise> - Updated exercise
+   * @throws Error if exercise not found
+   */
   async updateExercise(
     id: string,
     data: Partial<Omit<Exercise, 'id' | 'createdAt'>>
@@ -175,6 +230,14 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     return updated;
   }
 
+  /**
+   * Delete an exercise from library
+   *
+   * Does NOT cascade to workout_exercises - historical workout data is preserved.
+   *
+   * @param id - Exercise UUID
+   * @throws Error if exercise not found
+   */
   async deleteExercise(id: string): Promise<void> {
     const db = await this.getDb();
 
@@ -188,6 +251,14 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     await db.run('DELETE FROM exercises WHERE id = ?', [id]);
   }
 
+  /**
+   * Update lastUsed timestamp for an exercise
+   *
+   * Called automatically when exercise is used in a workout.
+   *
+   * @param id - Exercise UUID
+   * @param timestamp - ISO 8601 timestamp
+   */
   async updateLastUsed(id: string, timestamp: string): Promise<void> {
     const db = await this.getDb();
 
