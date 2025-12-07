@@ -30,9 +30,10 @@ vi.mock('@capacitor/preferences', () => ({
 
 // Mock @capacitor-community/sqlite for in-memory testing
 let mockConnection: any = null;
-let mockDbData: Map<string, any[]> = new Map();
+const mockDbData = new Map<string, any[]>();
 
 const createMockConnection = () => ({
+  open: vi.fn().mockResolvedValue(undefined),
   execute: vi.fn().mockImplementation(async (sql: string) => {
     // Handle table creation
     if (sql.includes('CREATE TABLE')) {
@@ -69,6 +70,22 @@ vi.mock('@capacitor-community/sqlite', () => ({
       return undefined;
     }),
     isConnection: vi.fn().mockResolvedValue({ result: true }),
+    exportToJson: vi.fn().mockImplementation(async () => {
+      return {
+        export: {
+          database: 'fitronix.db',
+          version: 1,
+          encrypted: false,
+          mode: 'full',
+          tables: [],
+        },
+      };
+    }),
+    importFromJson: vi.fn().mockImplementation(async ({ jsonstring }: { jsonstring: string }) => {
+      // Validate JSON format
+      JSON.parse(jsonstring);
+      return { changes: { changes: 0 } };
+    }),
   },
 }));
 
