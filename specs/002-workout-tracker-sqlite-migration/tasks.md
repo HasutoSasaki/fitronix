@@ -103,8 +103,8 @@
 ### Implementation for User Story 3
 
 - [X] T030 [US3] Add getSchemaVersion() method to DatabaseManager
-- [ ] T031 [US3] Add verifySchemaIntegrity() to check for schema drift
-- [ ] T032 [US3] Document future migration pattern in data-model.md
+- [X] T031 [US3] Add verifySchemaIntegrity() to check for schema drift
+- [X] T032 [US3] Document future migration pattern in data-model.md
 
 **Checkpoint**: Schema versioning accessible, migration pattern documented
 

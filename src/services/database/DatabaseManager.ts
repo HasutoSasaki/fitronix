@@ -201,6 +201,44 @@ class DatabaseManager {
 
     return 0;
   }
+
+  /**
+   * Verify essential tables exist
+   * Lightweight schema integrity check for production
+   *
+   * @returns true if all required tables exist, false otherwise
+   */
+  public async verifySchemaIntegrity(): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    const requiredTables = [
+      'schema_version',
+      'workout_sessions',
+      'workout_exercises',
+      'sets',
+      'exercises',
+    ];
+
+    try {
+      for (const tableName of requiredTables) {
+        const result = await this.db.query(
+          `SELECT name FROM sqlite_master WHERE type='table' AND name=?`,
+          [tableName]
+        );
+
+        if (!result.values || result.values.length === 0) {
+          console.error(`Missing table: ${tableName}`);
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('Schema integrity check failed:', error);
+      return false;
+    }
+  }
 }
 
 // Export singleton instance

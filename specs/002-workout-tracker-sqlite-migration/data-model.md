@@ -380,23 +380,158 @@ Not enforced by database (handled by TypeScript types):
 
 **Initial schema** - No migrations yet.
 
-### Future Migrations
+### Migration Pattern (Future Reference)
 
-**Example**: Adding a new column in version 2:
+When the schema needs to evolve (e.g., adding columns, creating tables, changing constraints), follow this pattern:
 
-```sql
--- Migration v1 → v2
-ALTER TABLE workout_sessions ADD COLUMN notes TEXT;
+#### Step 1: Create Migration SQL
 
-INSERT INTO schema_version (version, appliedAt)
-VALUES (2, datetime('now'));
+Create a new migration file: `src/services/database/migrations/v2.ts`
+
+```typescript
+export const MIGRATION_V2_SQL = `
+  -- Add notes column to workout_sessions
+  ALTER TABLE workout_sessions ADD COLUMN notes TEXT;
+
+  -- Update schema version
+  INSERT INTO schema_version (version, appliedAt)
+  VALUES (2, datetime('now'));
+`;
+
+export const SCHEMA_VERSION_2 = 2;
 ```
 
-**Application Logic**:
+#### Step 2: Update DatabaseManager
+
+Modify `DatabaseManager.initialize()` to apply migrations:
+
 ```typescript
-const currentVersion = await db.getSchemaVersion();
-if (currentVersion < 2) {
-  await db.execute(MIGRATION_V2_SQL);
+public async initialize(dbName?: string): Promise<void> {
+  // ... existing initialization code ...
+
+  // Apply pending migrations
+  await this.applyMigrations();
+}
+
+private async applyMigrations(): Promise<void> {
+  const currentVersion = await this.getSchemaVersion();
+
+  // Apply v1 → v2 if needed
+  if (currentVersion < 2) {
+    await this.db.execute(MIGRATION_V2_SQL);
+    console.log('Applied migration v1 → v2');
+  }
+
+  // Future: Apply v2 → v3, v3 → v4, etc.
+}
+```
+
+#### Step 3: Test Migration
+
+Create migration test: `tests/integration/migrations.test.ts`
+
+```typescript
+describe('Schema Migrations', () => {
+  it('should migrate from v1 to v2', async () => {
+    // 1. Initialize with v1 schema
+    const db = DatabaseManager.getInstance();
+    await db.initialize(':memory:');
+
+    // 2. Verify v1 schema
+    expect(await db.getSchemaVersion()).toBe(1);
+
+    // 3. Apply migration
+    await db.applyMigrations();
+
+    // 4. Verify v2 schema
+    expect(await db.getSchemaVersion()).toBe(2);
+
+    // 5. Verify new column exists
+    const result = await db.query('PRAGMA table_info(workout_sessions)');
+    const columns = result.values.map(col => col.name);
+    expect(columns).toContain('notes');
+  });
+});
+```
+
+### Migration Safety Rules
+
+1. **Never delete columns**: Use `ALTER TABLE ADD COLUMN` only
+2. **Always use transactions**: Wrap migrations in `BEGIN...COMMIT`
+3. **Test before deploy**: Run migration tests on sample data
+4. **Version strictly**: Never skip versions (v1 → v2 → v3, not v1 → v3)
+5. **Backup data**: Users should export JSON before major updates
+
+### Common Migration Scenarios
+
+#### Scenario 1: Add Optional Column
+
+```sql
+-- Safe: Adding nullable column
+ALTER TABLE workout_sessions ADD COLUMN notes TEXT;
+```
+
+#### Scenario 2: Add Required Column with Default
+
+```sql
+-- Safe: Add column with default value
+ALTER TABLE workout_sessions ADD COLUMN difficulty TEXT DEFAULT 'medium';
+```
+
+#### Scenario 3: Create New Table
+
+```sql
+-- Safe: Create new table
+CREATE TABLE IF NOT EXISTS workout_templates (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  exercises TEXT NOT NULL,  -- JSON array
+  createdAt TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_templates_name
+  ON workout_templates(name COLLATE NOCASE);
+```
+
+#### Scenario 4: Modify Existing Data
+
+```sql
+-- Risky: Use with caution
+UPDATE workout_sessions
+SET notes = 'Migrated from v1'
+WHERE notes IS NULL;
+```
+
+### Schema Versioning API
+
+Current DatabaseManager provides:
+
+- `getSchemaVersion()`: Returns current schema version (e.g., 1, 2, 3)
+- `verifySchemaIntegrity()`: Checks all required tables exist
+- `exportToJson()`: Backup before migration
+- `importFromJson()`: Restore if migration fails
+
+**Recommended Flow**:
+```typescript
+// 1. Check current version
+const version = await db.getSchemaVersion();
+
+// 2. Verify integrity before migration
+const isValid = await db.verifySchemaIntegrity();
+if (!isValid) {
+  throw new Error('Schema integrity check failed');
+}
+
+// 3. Backup data
+const backup = await db.exportToJson();
+
+// 4. Apply migration
+try {
+  await db.applyMigrations();
+} catch (error) {
+  // 5. Restore from backup if failed
+  await db.importFromJson(backup);
+  throw error;
 }
 ```
 
