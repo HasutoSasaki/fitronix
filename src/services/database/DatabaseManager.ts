@@ -45,7 +45,7 @@ class DatabaseManager {
 
     try {
       // Create connection
-      const ret = await CapacitorSQLite.createConnection({
+      const connection = await CapacitorSQLite.createConnection({
         database: this.dbName,
         version: SCHEMA_VERSION,
         encrypted: false,
@@ -53,7 +53,7 @@ class DatabaseManager {
         readonly: false,
       });
 
-      this.db = ret;
+      this.db = connection as unknown as SQLiteDBConnection;
 
       // Open database
       await this.db.open();
