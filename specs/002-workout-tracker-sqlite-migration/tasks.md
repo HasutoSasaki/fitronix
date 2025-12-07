@@ -102,7 +102,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Add getSchemaVersion() method to DatabaseManager
+- [X] T030 [US3] Add getSchemaVersion() method to DatabaseManager
 - [ ] T031 [US3] Add verifySchemaIntegrity() to check for schema drift
 - [ ] T032 [US3] Document future migration pattern in data-model.md
 
@@ -118,10 +118,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T033 [P] [US4] Implement exportToJson() in DatabaseManager
-- [ ] T034 [P] [US4] Implement importFromJson() in DatabaseManager
+- [X] T033 [P] [US4] Implement exportToJson() in DatabaseManager
+- [X] T034 [P] [US4] Implement importFromJson() in DatabaseManager
 - [ ] T035 [US4] Add transaction support for import operations
-- [ ] T036 [US4] Add JSON validation and error handling
+- [X] T036 [US4] Add JSON validation and error handling
 - [ ] T037 [US4] Test export/import with 100 sessions (< 5s requirement)
 - [ ] T038 [US4] Handle invalid JSON format with proper error messages
 
