@@ -120,10 +120,10 @@
 
 - [X] T033 [P] [US4] Implement exportToJson() in DatabaseManager
 - [X] T034 [P] [US4] Implement importFromJson() in DatabaseManager
-- [ ] T035 [US4] Add transaction support for import operations
+- [X] T035 [US4] Add transaction support for import operations
 - [X] T036 [US4] Add JSON validation and error handling
 - [ ] T037 [US4] Test export/import with 100 sessions (< 5s requirement)
-- [ ] T038 [US4] Handle invalid JSON format with proper error messages
+- [X] T038 [US4] Handle invalid JSON format with proper error messages
 
 **Checkpoint**: Export/import fully functional, performance requirements met
 
@@ -135,10 +135,10 @@
 
 - [X] T039 Add JSDoc comments to all public methods in SqliteWorkoutSessionStorage
 - [X] T040 Add JSDoc comments to all public methods in SqliteExerciseLibraryStorage
-- [ ] T041 Update README with SQLite migration notes and usage examples
-- [ ] T042 Run full test suite (npm test) and verify 100% pass rate
-- [ ] T043 Verify no console errors or warnings in test output
-- [ ] T044 Run linter (npm run lint) and fix any issues
+- [X] T041 Update README with SQLite migration notes and usage examples
+- [X] T042 Run full test suite (npm test) and verify 100% pass rate
+- [X] T043 Verify no console errors or warnings in test output
+- [X] T044 Run linter (npm run lint) and fix any issues
 
 **Final Checkpoint**: All tasks complete, ready for PR
 
