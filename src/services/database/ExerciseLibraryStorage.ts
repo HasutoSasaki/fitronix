@@ -1,5 +1,5 @@
 /**
- * SqliteExerciseLibraryStorage - SQLite implementation of IExerciseLibraryStorage
+ * ExerciseLibraryStorage - SQLite implementation of IExerciseLibraryStorage
  * Manages user's exercise library in SQLite database
  */
 
@@ -11,7 +11,7 @@ import type {
 import { generateUUID, getCurrentTimestamp } from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
 
-export class SqliteExerciseLibraryStorage implements IExerciseLibraryStorage {
+export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   private async getDb() {
     return await DatabaseManager.getConnection();
   }

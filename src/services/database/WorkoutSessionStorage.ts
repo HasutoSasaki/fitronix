@@ -1,5 +1,5 @@
 /**
- * SqliteWorkoutSessionStorage - SQLite implementation of IWorkoutSessionStorage
+ * WorkoutSessionStorage - SQLite implementation of IWorkoutSessionStorage
  * Manages workout sessions, exercises, and sets in SQLite database
  */
 
@@ -12,7 +12,7 @@ import type {
 import { generateUUID, getCurrentTimestamp, getUpdatedTimestamp } from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
 
-export class SqliteWorkoutSessionStorage implements IWorkoutSessionStorage {
+export class WorkoutSessionStorage implements IWorkoutSessionStorage {
   private async getDb() {
     return await DatabaseManager.getConnection();
   }
