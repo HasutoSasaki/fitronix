@@ -9,7 +9,7 @@ import type {
   IPreferencesStorage,
   IWorkoutSessionStorage,
   IExerciseLibraryStorage,
-} from '../../specs/001-workout-tracker/contracts/storage';
+} from '../contracts/storage';
 import type {
   WorkoutSession,
   Exercise,

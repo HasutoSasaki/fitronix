@@ -5,7 +5,7 @@
  * All methods are async and return Promises.
  */
 
-import type { WorkoutSession, Exercise, Set, WorkoutExercise } from '../types/models';
+import type { WorkoutSession, Exercise } from '../../src/types/models';
 
 /**
  * Storage interface for workout sessions

@@ -15,7 +15,7 @@ import type {
   WorkoutSession,
   Exercise,
   BodyPart,
-} from '../../../src/types/models';
+} from '../types/models';
 
 /**
  * Workout Session Storage Contract
@@ -250,18 +250,6 @@ export interface IExerciseLibraryStorage {
    */
   deleteExercise(id: string): Promise<void>;
 
-  /**
-   * Update lastUsed timestamp for an exercise
-   *
-   * Called automatically when exercise is used in a workout.
-   *
-   * @param id - Exercise UUID
-   * @param timestamp - ISO 8601 timestamp
-   *
-   * @example
-   * await storage.updateLastUsed('ex-uuid', new Date().toISOString());
-   */
-  updateLastUsed(id: string, timestamp: string): Promise<void>;
 }
 
 /**
@@ -319,16 +307,6 @@ export interface IPreferencesStorage {
    */
   clear(): Promise<void>;
 
-  /**
-   * Get all preferences as key-value pairs
-   *
-   * @returns Object with all preferences
-   *
-   * @example
-   * const allPrefs = await storage.getAll();
-   * // Returns: { theme: 'dark', defaultRestTime: '90', ... }
-   */
-  getAll(): Promise<Record<string, string>>;
 }
 
 /**
@@ -405,3 +383,42 @@ export function isUUIDv4(value: unknown): value is string {
  * - ✅ clear() removes all preferences
  * - ✅ getAll() returns all preferences as key-value object
  */
+
+/**
+ * Low-level storage interface wrapping Capacitor Preferences API
+ */
+export interface IPreferencesStorage {
+  /**
+   * Get a value from storage
+   * @param key - Storage key
+   * @returns Promise<T | null> - Parsed value or null if not found
+   */
+  get<T>(key: string): Promise<T | null>;
+
+  /**
+   * Set a value in storage
+   * @param key - Storage key
+   * @param value - Value to store (will be JSON stringified)
+   * @returns Promise<void>
+   */
+  set<T>(key: string, value: T): Promise<void>;
+
+  /**
+   * Remove a value from storage
+   * @param key - Storage key
+   * @returns Promise<void>
+   */
+  remove(key: string): Promise<void>;
+
+  /**
+   * Clear all storage (use with caution)
+   * @returns Promise<void>
+   */
+  clear(): Promise<void>;
+
+  /**
+   * Get all storage keys
+   * @returns Promise<string[]> - Array of all keys
+   */
+  keys(): Promise<string[]>;
+}
