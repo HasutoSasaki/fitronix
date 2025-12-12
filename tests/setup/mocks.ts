@@ -45,11 +45,11 @@ const createMockConnection = () => ({
     }
     return { changes: { changes: 0 } };
   }),
-  query: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+  query: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
     // Simple mock query responses
     return { values: [] };
   }),
-  run: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+  run: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
     return { changes: { changes: 1, lastId: 1 } };
   }),
   close: vi.fn().mockResolvedValue(undefined),
@@ -58,7 +58,7 @@ const createMockConnection = () => ({
 
 vi.mock('@capacitor-community/sqlite', () => ({
   CapacitorSQLite: {
-    createConnection: vi.fn().mockImplementation(async (options: any) => {
+    createConnection: vi.fn().mockImplementation(async (_options: any) => {
       if (!mockConnection) {
         mockConnection = createMockConnection();
       }
