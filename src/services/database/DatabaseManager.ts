@@ -45,15 +45,13 @@ class DatabaseManager {
 
     try {
       // Create connection
-      const connection = await CapacitorSQLite.createConnection({
+      this.db = await CapacitorSQLite.createConnection({
         database: this.dbName,
         version: SCHEMA_VERSION,
         encrypted: false,
         mode: 'no-encryption',
         readonly: false,
       });
-
-      this.db = connection as unknown as SQLiteDBConnection;
 
       // Open database
       await this.db.open();
@@ -64,7 +62,7 @@ class DatabaseManager {
       this.isInitialized = true;
     } catch (error) {
       console.error('Failed to initialize database:', error);
-      throw new Error(`Database initialization failed: ${error}`);
+      throw new Error(`Database initialization failed: ${String(error)}`);
     }
   }
 
@@ -87,7 +85,7 @@ class DatabaseManager {
       await this.db.run(INSERT_SCHEMA_VERSION_SQL, [SCHEMA_VERSION]);
     } catch (error) {
       console.error('Failed to create tables:', error);
-      throw new Error(`Table creation failed: ${error}`);
+      throw new Error(`Table creation failed: ${String(error)}`);
     }
   }
 

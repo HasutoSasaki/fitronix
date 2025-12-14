@@ -401,7 +401,7 @@ export interface IPreferencesStorage {
    * @param value - Value to store (will be JSON stringified)
    * @returns Promise<void>
    */
-  set<T>(key: string, value: T): Promise<void>;
+  set(key: string, value: unknown): Promise<void>;
 
   /**
    * Remove a value from storage
