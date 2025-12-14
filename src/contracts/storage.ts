@@ -252,62 +252,6 @@ export interface IExerciseLibraryStorage {
 
 }
 
-/**
- * Preferences Storage Contract
- *
- * Simple key-value storage for app settings (e.g., timer defaults,
- * UI preferences, user profile).
- */
-export interface IPreferencesStorage {
-  /**
-   * Get a value by key
-   *
-   * @param key - Preference key
-   * @returns Value as string, or null if not found
-   *
-   * @example
-   * const theme = await storage.get('theme');
-   * // Returns: 'dark' or null
-   */
-  get(key: string): Promise<string | null>;
-
-  /**
-   * Set a key-value pair
-   *
-   * Creates new entry if key doesn't exist, updates if it does.
-   *
-   * @param key - Preference key
-   * @param value - Value to store (will be stringified)
-   *
-   * @example
-   * await storage.set('theme', 'dark');
-   * await storage.set('defaultRestTime', '90');
-   */
-  set(key: string, value: string): Promise<void>;
-
-  /**
-   * Remove a key-value pair
-   *
-   * No-op if key doesn't exist.
-   *
-   * @param key - Preference key to remove
-   *
-   * @example
-   * await storage.remove('theme');
-   */
-  remove(key: string): Promise<void>;
-
-  /**
-   * Clear all preferences
-   *
-   * WARNING: Destructive operation. Use with caution.
-   *
-   * @example
-   * await storage.clear();  // Removes all preferences
-   */
-  clear(): Promise<void>;
-
-}
 
 /**
  * Type Guards
@@ -381,7 +325,7 @@ export function isUUIDv4(value: unknown): value is string {
  * - ✅ set() updates existing preference
  * - ✅ remove() deletes preference
  * - ✅ clear() removes all preferences
- * - ✅ getAll() returns all preferences as key-value object
+ * - ✅ keys() returns all preference keys as array
  */
 
 /**
