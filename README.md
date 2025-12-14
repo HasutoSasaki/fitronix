@@ -147,7 +147,7 @@ if (!isValid) {
 
 ## プロジェクト構成
 
-```
+```text
 fitronix/
 ├── src/
 │   ├── services/
