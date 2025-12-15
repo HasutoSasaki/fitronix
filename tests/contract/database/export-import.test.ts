@@ -49,7 +49,7 @@ describe('Contract: Data Export and Import (US4)', () => {
       );
     });
 
-    it('should not throw error when importFromJson receives invalid JSON (data integrity protected by transaction)', async () => {
+    it('should throw an "Invalid JSON format" error when importFromJson receives invalid JSON', async () => {
       // This test verifies transaction rollback prevents data corruption
       // Since we cannot easily create data in mock environment, we test the error handling itself
       const invalidJson = 'invalid json data';
