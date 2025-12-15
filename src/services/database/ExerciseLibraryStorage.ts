@@ -113,9 +113,15 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   async searchExercises(query: string): Promise<Exercise[]> {
     const db = await this.getDb();
 
+    // Escape SQL wildcards to prevent unintended pattern matching
+    const escapedQuery = query
+      .replace(/\\/g, '\\\\')  // Escape backslash first
+      .replace(/%/g, '\\%')    // Escape percent
+      .replace(/_/g, '\\_');   // Escape underscore
+
     const result = await db.query(
-      'SELECT * FROM exercises WHERE name LIKE ? COLLATE NOCASE ORDER BY lastUsed DESC',
-      [`%${query}%`]
+      'SELECT * FROM exercises WHERE name LIKE ? ESCAPE \'\\\' COLLATE NOCASE ORDER BY lastUsed DESC',
+      [`%${escapedQuery}%`]
     );
 
     if (!result.values || result.values.length === 0) {
