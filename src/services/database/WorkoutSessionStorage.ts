@@ -7,7 +7,7 @@ import type { IWorkoutSessionStorage } from '../../../specs/002-workout-tracker-
 import type {
   WorkoutSession,
   WorkoutExercise,
-  Set,
+  Set as WorkoutSet,
 } from '../../types/models';
 import { generateUUID, getCurrentTimestamp, getUpdatedTimestamp } from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
@@ -410,7 +410,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
         [exerciseRow.id]
       );
 
-      const sets: Set[] = (setsResult.values || []).map(setRow => ({
+      const sets: WorkoutSet[] = (setsResult.values || []).map(setRow => ({
         id: setRow.id,
         exerciseId: setRow.exerciseId,
         weight: setRow.weight,
@@ -426,6 +426,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
         exerciseName: exerciseRow.exerciseName,
         bodyPart: exerciseRow.bodyPart,
         sets,
+        maxWeight: exerciseRow.maxWeight ?? undefined,
         order: exerciseRow.order,
       });
     }
