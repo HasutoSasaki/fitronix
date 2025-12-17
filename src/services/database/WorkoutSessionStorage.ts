@@ -3,7 +3,7 @@
  * Manages workout sessions, exercises, and sets in SQLite database
  */
 
-import type { IWorkoutSessionStorage } from '../../../specs/002-workout-tracker-sqlite-migration/contracts/storage';
+import type { IWorkoutSessionStorage } from '../../contracts/storage';
 import type {
   WorkoutSession,
   WorkoutExercise,

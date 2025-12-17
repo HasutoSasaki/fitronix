@@ -86,7 +86,7 @@ describe('Contract: Data Export and Import (US4)', () => {
       const jsonString = await db.exportToJson();
 
       // Should not throw
-      await expect(db.importFromJson(jsonString)).resolves.not.toThrow();
+      await expect(db.importFromJson(jsonString)).resolves.toBeUndefined();
     });
 
     it('should reject invalid JSON and maintain transaction atomicity', async () => {

@@ -12,7 +12,7 @@ import { BodyPart } from '../../src/types/models';
 import { generateUUID } from '../../src/utils/storage';
 
 // Import implementation
-import { WorkoutSessionStorage } from '../../src/services/storage';
+import { WorkoutSessionStorage } from '../../src/services/database/storage';
 
 /**
  * 100個のワークアウトセッションを作成
@@ -104,10 +104,12 @@ describe('Performance: Query Performance', () => {
   const PERFORMANCE_THRESHOLD_MS = 2000;
 
   beforeEach(async () => {
+    // SQLite用にDatabaseManagerを初期化
+    const DatabaseManager = (await import('../../src/services/database/DatabaseManager')).default;
+    await DatabaseManager.initialize(':memory:');
+    await DatabaseManager.clearAllData();
+    
     storage = new WorkoutSessionStorage();
-    // テスト前に既存のセッションをクリア
-    const allSessions = await storage.getAllSessions();
-    await Promise.all(allSessions.map((s) => storage.deleteSession(s.id)));
   });
 
   describe('大量データでのgetSessionsByDateRange性能テスト', () => {
