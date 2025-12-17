@@ -68,8 +68,6 @@ export default tseslint.config(
       'specs/**',
       '*.config.js',
       '*.config.ts',
-      'src/services/database/**',
-      'tests/**',
     ],
   }
 );
