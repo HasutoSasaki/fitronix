@@ -269,11 +269,12 @@ export function isBodyPart(value: unknown): value is BodyPart {
 
 /**
  * Check if value is a valid ISO 8601 timestamp
+ * Supports date-only (YYYY-MM-DD) and full datetime with optional fractional seconds and either Z or timezone offset
  */
 export function isISO8601(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   const iso8601Regex =
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+    /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2}))?$/;
   return iso8601Regex.test(value);
 }
 
