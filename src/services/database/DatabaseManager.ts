@@ -3,7 +3,7 @@
  * Handles initialization, schema creation, and connection management
  */
 
-import { CapacitorSQLite, SQLiteDBConnection } from '@capacitor-community/sqlite';
+import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection } from '@capacitor-community/sqlite';
 import {
   CREATE_TABLES_SQL,
   CREATE_INDEXES_SQL,
@@ -17,9 +17,11 @@ class DatabaseManager {
   private dbName = 'fitronix_workout_tracker';
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
+  private sqliteConnection: SQLiteConnection;
 
   private constructor() {
     // Private constructor for singleton
+    this.sqliteConnection = new SQLiteConnection(CapacitorSQLite);
   }
 
   public static getInstance(): DatabaseManager {
@@ -45,16 +47,16 @@ class DatabaseManager {
 
     try {
       // Create connection
-      this.db = await CapacitorSQLite.createConnection({
-        database: this.dbName,
-        version: SCHEMA_VERSION,
-        encrypted: false,
-        mode: 'no-encryption',
-        readonly: false,
-      });
+      this.db = await this.sqliteConnection.createConnection(
+        this.dbName,
+        false,
+        'no-encryption',
+        SCHEMA_VERSION,
+        false
+      );
 
       // Open database
-      await this.db.open();
+      await this.db?.open();
 
       // Create tables and indexes
       await this.createTables();
