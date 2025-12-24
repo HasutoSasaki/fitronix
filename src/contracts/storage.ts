@@ -318,7 +318,7 @@ export function isUUIDv4(value: unknown): value is string {
  * - ✅ createExercise() generates UUID and sets createdAt
  * - ✅ updateExercise() updates exercise fields
  * - ✅ deleteExercise() deletes exercise from library
- * - ✅ updateLastUsed() updates lastUsed timestamp
+ * - ✅ updateExercise() can update lastUsed field
  *
  * IPreferencesStorage:
  * - ✅ get() returns null when key doesn't exist
