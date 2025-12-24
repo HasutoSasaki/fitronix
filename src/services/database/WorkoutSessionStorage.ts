@@ -175,54 +175,66 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     const sessionId = generateUUID();
     const now = getCurrentTimestamp();
 
-    // Insert session
-    await db.run(
-      `INSERT INTO workout_sessions (id, date, totalTime, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?)`,
-      [sessionId, session.date, session.totalTime ?? null, now, now]
-    );
+    // Wrap in transaction for atomicity
+    await db.execute('BEGIN TRANSACTION');
 
-    // Insert exercises and sets
-    for (const exercise of session.exercises) {
-      const exerciseId = generateUUID();
-
-      // Calculate maxWeight from sets
-      const maxWeight = exercise.sets.length > 0
-        ? Math.max(...exercise.sets.map(s => s.weight))
-        : null;
-
+    try {
+      // Insert session
       await db.run(
-        `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          exerciseId,
-          sessionId,
-          exercise.exerciseId ?? null,
-          exercise.exerciseName,
-          exercise.bodyPart,
-          maxWeight,
-          exercise.order,
-        ]
+        `INSERT INTO workout_sessions (id, date, totalTime, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?)`,
+        [sessionId, session.date, session.totalTime ?? null, now, now]
       );
 
-      // Insert sets
-      for (const set of exercise.sets) {
-        const setId = generateUUID();
+      // Insert exercises and sets
+      for (const exercise of session.exercises) {
+        const exerciseId = generateUUID();
+
+        // Calculate maxWeight from sets
+        const maxWeight = exercise.sets.length > 0
+          ? Math.max(...exercise.sets.map(s => s.weight))
+          : null;
+
         await db.run(
-          `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+          `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            exerciseId,
+            sessionId,
+            exercise.exerciseId ?? null,
+            exercise.exerciseName,
+            exercise.bodyPart,
+            maxWeight,
+            exercise.order,
+          ]
         );
+
+        // Insert sets
+        for (const set of exercise.sets) {
+          const setId = generateUUID();
+          await db.run(
+            `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+          );
+        }
       }
-    }
 
-    // Return created session
-    const createdSession = await this.getSessionById(sessionId);
-    if (!createdSession) {
-      throw new Error('Failed to retrieve created session');
-    }
+      // Commit transaction
+      await db.execute('COMMIT');
 
-    return createdSession;
+      // Return created session
+      const createdSession = await this.getSessionById(sessionId);
+      if (!createdSession) {
+        throw new Error('Failed to retrieve created session');
+      }
+
+      return createdSession;
+    } catch (error) {
+      // Rollback transaction on error
+      await db.execute('ROLLBACK');
+      throw error;
+    }
   }
 
   /**
@@ -257,74 +269,86 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
 
     const updatedAt = getUpdatedTimestamp(existing.updatedAt);
 
-    // Build update query dynamically
-    const updates: string[] = [];
-    const values: any[] = [];
+    // Wrap in transaction for atomicity
+    await db.execute('BEGIN TRANSACTION');
 
-    if (data.date !== undefined) {
-      updates.push('date = ?');
-      values.push(data.date);
-    }
-    if (data.totalTime !== undefined) {
-      updates.push('totalTime = ?');
-      values.push(data.totalTime);
-    }
-    if (data.exercises !== undefined) {
-      // Delete existing exercises (cascade will delete sets)
-      await db.run('DELETE FROM workout_exercises WHERE sessionId = ?', [id]);
+    try {
+      // Build update query dynamically
+      const updates: string[] = [];
+      const values: any[] = [];
 
-      // Insert new exercises
-      for (const exercise of data.exercises) {
-        const exerciseId = generateUUID();
-        const maxWeight = exercise.sets.length > 0
-          ? Math.max(...exercise.sets.map(s => s.weight))
-          : null;
+      if (data.date !== undefined) {
+        updates.push('date = ?');
+        values.push(data.date);
+      }
+      if (data.totalTime !== undefined) {
+        updates.push('totalTime = ?');
+        values.push(data.totalTime);
+      }
+      if (data.exercises !== undefined) {
+        // Delete existing exercises (cascade will delete sets)
+        await db.run('DELETE FROM workout_exercises WHERE sessionId = ?', [id]);
 
-        await db.run(
-          `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [
-            exerciseId,
-            id,
-            exercise.exerciseId ?? null,
-            exercise.exerciseName,
-            exercise.bodyPart,
-            maxWeight,
-            exercise.order,
-          ]
-        );
+        // Insert new exercises
+        for (const exercise of data.exercises) {
+          const exerciseId = generateUUID();
+          const maxWeight = exercise.sets.length > 0
+            ? Math.max(...exercise.sets.map(s => s.weight))
+            : null;
 
-        // Insert sets
-        for (const set of exercise.sets) {
-          const setId = generateUUID();
           await db.run(
-            `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+            `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              exerciseId,
+              id,
+              exercise.exerciseId ?? null,
+              exercise.exerciseName,
+              exercise.bodyPart,
+              maxWeight,
+              exercise.order,
+            ]
           );
+
+          // Insert sets
+          for (const set of exercise.sets) {
+            const setId = generateUUID();
+            await db.run(
+              `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
+               VALUES (?, ?, ?, ?, ?, ?)`,
+              [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+            );
+          }
         }
       }
+
+      // Always update updatedAt
+      updates.push('updatedAt = ?');
+      values.push(updatedAt);
+
+      if (updates.length > 0) {
+        values.push(id);
+        await db.run(
+          `UPDATE workout_sessions SET ${updates.join(', ')} WHERE id = ?`,
+          values
+        );
+      }
+
+      // Commit transaction
+      await db.execute('COMMIT');
+
+      // Return updated session
+      const updated = await this.getSessionById(id);
+      if (!updated) {
+        throw new Error('Failed to retrieve updated session');
+      }
+
+      return updated;
+    } catch (error) {
+      // Rollback transaction on error
+      await db.execute('ROLLBACK');
+      throw error;
     }
-
-    // Always update updatedAt
-    updates.push('updatedAt = ?');
-    values.push(updatedAt);
-
-    if (updates.length > 0) {
-      values.push(id);
-      await db.run(
-        `UPDATE workout_sessions SET ${updates.join(', ')} WHERE id = ?`,
-        values
-      );
-    }
-
-    // Return updated session
-    const updated = await this.getSessionById(id);
-    if (!updated) {
-      throw new Error('Failed to retrieve updated session');
-    }
-
-    return updated;
   }
 
   /**
