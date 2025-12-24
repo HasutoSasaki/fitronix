@@ -15,7 +15,7 @@ import type {
   WorkoutSession,
   Exercise,
   BodyPart,
-} from '../../../src/types/models';
+} from '../types/models';
 
 /**
  * Workout Session Storage Contract
@@ -250,86 +250,8 @@ export interface IExerciseLibraryStorage {
    */
   deleteExercise(id: string): Promise<void>;
 
-  /**
-   * Update lastUsed timestamp for an exercise
-   *
-   * Called automatically when exercise is used in a workout.
-   *
-   * @param id - Exercise UUID
-   * @param timestamp - ISO 8601 timestamp
-   *
-   * @example
-   * await storage.updateLastUsed('ex-uuid', new Date().toISOString());
-   */
-  updateLastUsed(id: string, timestamp: string): Promise<void>;
 }
 
-/**
- * Preferences Storage Contract
- *
- * Simple key-value storage for app settings (e.g., timer defaults,
- * UI preferences, user profile).
- */
-export interface IPreferencesStorage {
-  /**
-   * Get a value by key
-   *
-   * @param key - Preference key
-   * @returns Value as string, or null if not found
-   *
-   * @example
-   * const theme = await storage.get('theme');
-   * // Returns: 'dark' or null
-   */
-  get(key: string): Promise<string | null>;
-
-  /**
-   * Set a key-value pair
-   *
-   * Creates new entry if key doesn't exist, updates if it does.
-   *
-   * @param key - Preference key
-   * @param value - Value to store (will be stringified)
-   *
-   * @example
-   * await storage.set('theme', 'dark');
-   * await storage.set('defaultRestTime', '90');
-   */
-  set(key: string, value: string): Promise<void>;
-
-  /**
-   * Remove a key-value pair
-   *
-   * No-op if key doesn't exist.
-   *
-   * @param key - Preference key to remove
-   *
-   * @example
-   * await storage.remove('theme');
-   */
-  remove(key: string): Promise<void>;
-
-  /**
-   * Clear all preferences
-   *
-   * WARNING: Destructive operation. Use with caution.
-   *
-   * @example
-   * await storage.clear();  // Removes all preferences
-   */
-  clear(): Promise<void>;
-
-  /**
-   * Get all preferences as key-value pairs
-   *
-   * @returns Object with all preferences
-   *
-   * @example
-   * const allPrefs = await storage.getAll();
-   * // Returns: { theme: 'dark', defaultRestTime: '90', ... }
-   */
-  getAll(): Promise<Record<string, string>>;
-}
 
 /**
  * Type Guards
@@ -347,11 +269,12 @@ export function isBodyPart(value: unknown): value is BodyPart {
 
 /**
  * Check if value is a valid ISO 8601 timestamp
+ * Supports date-only (YYYY-MM-DD) and full datetime with optional fractional seconds and either Z or timezone offset
  */
 export function isISO8601(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   const iso8601Regex =
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+    /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2}))?$/;
   return iso8601Regex.test(value);
 }
 
@@ -395,7 +318,7 @@ export function isUUIDv4(value: unknown): value is string {
  * - ✅ createExercise() generates UUID and sets createdAt
  * - ✅ updateExercise() updates exercise fields
  * - ✅ deleteExercise() deletes exercise from library
- * - ✅ updateLastUsed() updates lastUsed timestamp
+ * - ✅ updateExercise() can update lastUsed field
  *
  * IPreferencesStorage:
  * - ✅ get() returns null when key doesn't exist
@@ -403,5 +326,44 @@ export function isUUIDv4(value: unknown): value is string {
  * - ✅ set() updates existing preference
  * - ✅ remove() deletes preference
  * - ✅ clear() removes all preferences
- * - ✅ getAll() returns all preferences as key-value object
+ * - ✅ keys() returns all preference keys as array
  */
+
+/**
+ * Low-level storage interface wrapping Capacitor Preferences API
+ */
+export interface IPreferencesStorage {
+  /**
+   * Get a value from storage
+   * @param key - Storage key
+   * @returns Promise<T | null> - Parsed value or null if not found
+   */
+  get<T>(key: string): Promise<T | null>;
+
+  /**
+   * Set a value in storage
+   * @param key - Storage key
+   * @param value - Value to store (will be JSON stringified)
+   * @returns Promise<void>
+   */
+  set(key: string, value: unknown): Promise<void>;
+
+  /**
+   * Remove a value from storage
+   * @param key - Storage key
+   * @returns Promise<void>
+   */
+  remove(key: string): Promise<void>;
+
+  /**
+   * Clear all storage (use with caution)
+   * @returns Promise<void>
+   */
+  clear(): Promise<void>;
+
+  /**
+   * Get all storage keys
+   * @returns Promise<string[]> - Array of all keys
+   */
+  keys(): Promise<string[]>;
+}

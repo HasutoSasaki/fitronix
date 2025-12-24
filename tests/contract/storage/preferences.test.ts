@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { IPreferencesStorage } from '../../../specs/001-workout-tracker/contracts/storage';
+import type { IPreferencesStorage } from '../../../src/contracts/storage';
 
 // Import implementation (will be created in T028)
 import { PreferencesStorage } from '../../../src/services/storage';

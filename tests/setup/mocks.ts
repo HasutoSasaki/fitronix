@@ -28,6 +28,73 @@ vi.mock('@capacitor/preferences', () => ({
   },
 }));
 
+// Mock @capacitor-community/sqlite for in-memory testing
+let mockConnection: any = null;
+const mockDbData = new Map<string, any[]>();
+
+const createMockConnection = () => ({
+  open: vi.fn().mockResolvedValue(undefined),
+  execute: vi.fn().mockImplementation(async (sql: string) => {
+    // Handle table creation
+    if (sql.includes('CREATE TABLE')) {
+      return { changes: { changes: 0 } };
+    }
+    // Handle INSERT statements
+    if (sql.toUpperCase().includes('INSERT INTO schema_version')) {
+      return { changes: { changes: 1 } };
+    }
+    return { changes: { changes: 0 } };
+  }),
+  query: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
+    // Simple mock query responses
+    return { values: [] };
+  }),
+  run: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
+    return { changes: { changes: 1, lastId: 1 } };
+  }),
+  close: vi.fn().mockResolvedValue(undefined),
+  isDBOpen: vi.fn().mockResolvedValue({ result: true }),
+  beginTransaction: vi.fn().mockResolvedValue(undefined),
+  commitTransaction: vi.fn().mockResolvedValue(undefined),
+  rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+});
+
+vi.mock('@capacitor-community/sqlite', () => ({
+  CapacitorSQLite: {
+    createConnection: vi.fn().mockImplementation(async (_options: any) => {
+      if (!mockConnection) {
+        mockConnection = createMockConnection();
+      }
+      return mockConnection;
+    }),
+    closeConnection: vi.fn().mockImplementation(async () => {
+      mockConnection = null;
+      mockDbData.clear();
+      return undefined;
+    }),
+    isConnection: vi.fn().mockResolvedValue({ result: true }),
+    exportToJson: vi.fn().mockImplementation(async () => {
+      return {
+        export: {
+          database: 'fitronix.db',
+          version: 1,
+          encrypted: false,
+          mode: 'full',
+          tables: [],
+        },
+      };
+    }),
+    importFromJson: vi.fn().mockImplementation(async ({ jsonstring }: { jsonstring: string }) => {
+      // Validate JSON format
+      JSON.parse(jsonstring);
+      return { changes: { changes: 0 } };
+    }),
+  },
+  SQLiteConnection: vi.fn().mockImplementation((sqlite: any) => ({
+    createConnection: sqlite.createConnection,
+  })),
+}));
+
 // Mock Capacitor Local Notifications API
 vi.mock('@capacitor/local-notifications', () => ({
   LocalNotifications: {

@@ -7,8 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { IWorkoutSessionStorage } from '../../../specs/001-workout-tracker/contracts/storage';
-import type { WorkoutSession } from '../../../src/types/models';
+import type { IWorkoutSessionStorage } from '../../../src/contracts/storage';
 import { BodyPart } from '../../../src/types/models';
 
 // Import implementation (will be created in T029)

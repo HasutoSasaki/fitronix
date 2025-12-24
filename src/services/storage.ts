@@ -9,7 +9,7 @@ import type {
   IPreferencesStorage,
   IWorkoutSessionStorage,
   IExerciseLibraryStorage,
-} from '../../specs/001-workout-tracker/contracts/storage';
+} from '../contracts/storage';
 import type {
   WorkoutSession,
   Exercise,
@@ -28,7 +28,7 @@ export class PreferencesStorage implements IPreferencesStorage {
   async get<T>(key: string): Promise<T | null> {
     const { value } = await Preferences.get({ key });
 
-    if (value === null || value === undefined) {
+    if (!value) {
       return null;
     }
 
@@ -44,7 +44,7 @@ export class PreferencesStorage implements IPreferencesStorage {
    * Set a value in storage
    * Serializes value to JSON string
    */
-  async set<T>(key: string, value: T): Promise<void> {
+  async set(key: string, value: unknown): Promise<void> {
     const serialized = JSON.stringify(value);
     await Preferences.set({ key, value: serialized });
   }
@@ -164,12 +164,17 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       throw new Error(`Session not found: ${id}`);
     }
 
+    const currentSession = sessions[index];
+    if (!currentSession) {
+      throw new Error(`Session not found: ${id}`);
+    }
+    
     const updatedSession: WorkoutSession = {
-      ...sessions[index]!,
+      ...currentSession,
       ...updates,
       id, // Preserve ID
-      createdAt: sessions[index]!.createdAt, // Preserve createdAt
-      updatedAt: getUpdatedTimestamp(sessions[index]!.updatedAt),
+      createdAt: currentSession.createdAt, // Preserve createdAt
+      updatedAt: getUpdatedTimestamp(currentSession.updatedAt),
     };
 
     sessions[index] = updatedSession;
@@ -273,11 +278,16 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       throw new Error(`Exercise not found: ${id}`);
     }
 
+    const currentExercise = exercises[index];
+    if (!currentExercise) {
+      throw new Error(`Exercise not found: ${id}`);
+    }
+    
     const updatedExercise: Exercise = {
-      ...exercises[index]!,
+      ...currentExercise,
       ...updates,
       id, // Preserve ID
-      createdAt: exercises[index]!.createdAt, // Preserve createdAt
+      createdAt: currentExercise.createdAt, // Preserve createdAt
     };
 
     exercises[index] = updatedExercise;

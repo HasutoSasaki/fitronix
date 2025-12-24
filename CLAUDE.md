@@ -42,4 +42,16 @@ fix(storage): contract testの失敗を修正
 - 002-workout-tracker-sqlite-migration: Added TypeScript 5.7, JavaScript ES2020+
 
 <!-- MANUAL ADDITIONS START -->
+
+## 翻訳注意事項
+
+### プログラミング用語の正しい日本語訳
+
+- **contract** → インターフェース仕様、API仕様、型定義（「契約」は不適切）
+- **interface** → インターフェース、型定義
+- **implementation** → 実装、実装クラス
+- **specification** → 仕様、仕様書
+
+**注意**: 英語のプログラミング用語を直訳せず、日本の開発現場で一般的な用語を使用すること。
+
 <!-- MANUAL ADDITIONS END -->
