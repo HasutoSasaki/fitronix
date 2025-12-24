@@ -176,7 +176,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     const now = getCurrentTimestamp();
 
     // Wrap in transaction for atomicity
-    await db.execute('BEGIN TRANSACTION');
+    await db.beginTransaction();
 
     try {
       // Insert session
@@ -221,7 +221,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       }
 
       // Commit transaction
-      await db.execute('COMMIT');
+      await db.commitTransaction();
 
       // Return created session
       const createdSession = await this.getSessionById(sessionId);
@@ -232,7 +232,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       return createdSession;
     } catch (error) {
       // Rollback transaction on error
-      await db.execute('ROLLBACK');
+      await db.rollbackTransaction();
       throw error;
     }
   }
@@ -270,7 +270,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     const updatedAt = getUpdatedTimestamp(existing.updatedAt);
 
     // Wrap in transaction for atomicity
-    await db.execute('BEGIN TRANSACTION');
+    await db.beginTransaction();
 
     try {
       // Build update query dynamically
@@ -335,7 +335,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       }
 
       // Commit transaction
-      await db.execute('COMMIT');
+      await db.commitTransaction();
 
       // Return updated session
       const updated = await this.getSessionById(id);
@@ -346,7 +346,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       return updated;
     } catch (error) {
       // Rollback transaction on error
-      await db.execute('ROLLBACK');
+      await db.rollbackTransaction();
       throw error;
     }
   }

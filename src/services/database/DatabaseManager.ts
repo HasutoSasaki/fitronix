@@ -191,18 +191,18 @@ class DatabaseManager {
       // Validate JSON format before attempting import
       JSON.parse(jsonString);
 
-      // Begin transaction for atomic import
-      await this.db.execute('BEGIN TRANSACTION');
+      // Begin transaction for atomic import using plugin API
+      await this.db.beginTransaction();
 
       try {
         // Import data using CapacitorSQLite API
         await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
 
         // Commit transaction on success
-        await this.db.execute('COMMIT');
+        await this.db.commitTransaction();
       } catch (importError) {
         // Rollback transaction on failure to prevent partial import
-        await this.db.execute('ROLLBACK');
+        await this.db.rollbackTransaction();
         throw importError;
       }
     } catch (error) {

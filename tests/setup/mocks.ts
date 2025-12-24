@@ -54,6 +54,9 @@ const createMockConnection = () => ({
   }),
   close: vi.fn().mockResolvedValue(undefined),
   isDBOpen: vi.fn().mockResolvedValue({ result: true }),
+  beginTransaction: vi.fn().mockResolvedValue(undefined),
+  commitTransaction: vi.fn().mockResolvedValue(undefined),
+  rollbackTransaction: vi.fn().mockResolvedValue(undefined),
 });
 
 vi.mock('@capacitor-community/sqlite', () => ({
@@ -87,6 +90,9 @@ vi.mock('@capacitor-community/sqlite', () => ({
       return { changes: { changes: 0 } };
     }),
   },
+  SQLiteConnection: vi.fn().mockImplementation((sqlite: any) => ({
+    createConnection: sqlite.createConnection,
+  })),
 }));
 
 // Mock Capacitor Local Notifications API
