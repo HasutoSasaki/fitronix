@@ -135,10 +135,10 @@ describe('Performance: Query Performance', () => {
       // 結果の妥当性をチェック
       for (const session of results) {
         const sessionTime = new Date(session.date).getTime();
-        const startTime = new Date(startDate).getTime();
-        const endTime = new Date(endDate).getTime();
-        expect(sessionTime).toBeGreaterThanOrEqual(startTime);
-        expect(sessionTime).toBeLessThanOrEqual(endTime);
+        const rangeStartTime = new Date(startDate).getTime();
+        const rangeEndTime = new Date(endDate).getTime();
+        expect(sessionTime).toBeGreaterThanOrEqual(rangeStartTime);
+        expect(sessionTime).toBeLessThanOrEqual(rangeEndTime);
       }
 
       console.log(`1週間範囲クエリ実行時間: ${executionTime.toFixed(2)}ms (結果: ${results.length}セッション)`);
@@ -166,10 +166,10 @@ describe('Performance: Query Performance', () => {
       // 結果の妥当性をチェック
       for (const session of results) {
         const sessionTime = new Date(session.date).getTime();
-        const startTime = new Date(startDate).getTime();
-        const endTime = new Date(endDate).getTime();
-        expect(sessionTime).toBeGreaterThanOrEqual(startTime);
-        expect(sessionTime).toBeLessThanOrEqual(endTime);
+        const rangeStartTime = new Date(startDate).getTime();
+        const rangeEndTime = new Date(endDate).getTime();
+        expect(sessionTime).toBeGreaterThanOrEqual(rangeStartTime);
+        expect(sessionTime).toBeLessThanOrEqual(rangeEndTime);
       }
 
       console.log(`1ヶ月範囲クエリ実行時間: ${executionTime.toFixed(2)}ms (結果: ${results.length}セッション)`);
@@ -197,10 +197,10 @@ describe('Performance: Query Performance', () => {
       // 結果の妥当性をチェック
       for (const session of results) {
         const sessionTime = new Date(session.date).getTime();
-        const startTime = new Date(startDate).getTime();
-        const endTime = new Date(endDate).getTime();
-        expect(sessionTime).toBeGreaterThanOrEqual(startTime);
-        expect(sessionTime).toBeLessThanOrEqual(endTime);
+        const rangeStartTime = new Date(startDate).getTime();
+        const rangeEndTime = new Date(endDate).getTime();
+        expect(sessionTime).toBeGreaterThanOrEqual(rangeStartTime);
+        expect(sessionTime).toBeLessThanOrEqual(rangeEndTime);
       }
 
       console.log(`3ヶ月範囲クエリ実行時間: ${executionTime.toFixed(2)}ms (結果: ${results.length}セッション)`);
