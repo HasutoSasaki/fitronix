@@ -140,6 +140,21 @@
 - [x] T043 Verify no console errors or warnings in test output
 - [x] T044 Run linter (npm run lint) and fix any issues
 
+### Code Quality Automation (Git Hooks)
+
+**Purpose**: Automate code quality checks before commits to prevent broken code from being committed
+
+- [ ] T045 [P] Install husky v9+ with `npm install --save-dev husky`
+- [ ] T046 [P] Install lint-staged with `npm install --save-dev lint-staged`
+- [ ] T047 Initialize husky with `npx husky init`
+- [ ] T048 Configure lint-staged in package.json to run linter and prettier on staged files
+- [ ] T049 Create pre-commit hook to run lint-staged using `echo "npx lint-staged" > .husky/pre-commit`
+- [ ] T050 Test pre-commit hook by making a commit with intentional lint errors (should be blocked)
+- [ ] T051 Add .husky/ directory to git with `git add .husky/pre-commit`
+- [ ] T052 Update .gitignore to exclude husky temporary files if needed
+
+**Checkpoint**: Pre-commit hooks working - linting and formatting run automatically on git commit
+
 **Final Checkpoint**: All tasks complete, ready for PR
 
 ---
