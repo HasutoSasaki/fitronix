@@ -8,9 +8,38 @@ import type {
   WorkoutSession,
   WorkoutExercise,
   Set as WorkoutSet,
+  BodyPart,
 } from '../../types/models';
-import { generateUUID, getCurrentTimestamp, getUpdatedTimestamp } from '../../utils/storage';
+import {
+  generateUUID,
+  getCurrentTimestamp,
+  getUpdatedTimestamp,
+} from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
+import type { SQLiteRow } from './types';
+
+/**
+ * Helper function to safely convert unknown to SQLiteRow
+ */
+function toSQLiteRow(value: unknown): SQLiteRow {
+  return value as SQLiteRow;
+}
+
+/**
+ * Helper function to safely get string value from SQLiteRow
+ */
+function getStringValue(row: SQLiteRow, key: string): string {
+  const value = row[key];
+  return String(value);
+}
+
+/**
+ * Helper function to safely get nullable number value from SQLiteRow
+ */
+function getNumberValue(row: SQLiteRow, key: string): number | undefined {
+  const value = row[key];
+  return value !== null ? Number(value) : undefined;
+}
 
 export class WorkoutSessionStorage implements IWorkoutSessionStorage {
   private async getDb() {
@@ -46,15 +75,20 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
 
     // For each session, fetch exercises and sets
     const sessions: WorkoutSession[] = [];
-    for (const sessionRow of sessionsResult.values) {
-      const exercises = await this.getExercisesForSession(sessionRow.id);
+    for (const rawRow of sessionsResult.values) {
+      const sessionRow = toSQLiteRow(rawRow);
+      const exercises = await this.getExercisesForSession(
+        getStringValue(sessionRow, 'id')
+      );
+      const totalTime = getNumberValue(sessionRow, 'totalTime');
+
       sessions.push({
-        id: sessionRow.id,
-        date: sessionRow.date,
-        totalTime: sessionRow.totalTime ?? undefined,
+        id: getStringValue(sessionRow, 'id'),
+        date: getStringValue(sessionRow, 'date'),
+        ...(totalTime !== undefined && { totalTime }),
         exercises,
-        createdAt: sessionRow.createdAt,
-        updatedAt: sessionRow.updatedAt,
+        createdAt: getStringValue(sessionRow, 'createdAt'),
+        updatedAt: getStringValue(sessionRow, 'updatedAt'),
       });
     }
 
@@ -87,16 +121,23 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       return null;
     }
 
-    const sessionRow = result.values[0];
-    const exercises = await this.getExercisesForSession(sessionRow.id);
+    const firstRow: unknown = result.values[0];
+    if (firstRow === undefined) {
+      return null;
+    }
+    const sessionRow = toSQLiteRow(firstRow);
+    const exercises = await this.getExercisesForSession(
+      getStringValue(sessionRow, 'id')
+    );
+    const totalTime = getNumberValue(sessionRow, 'totalTime');
 
     return {
-      id: sessionRow.id,
-      date: sessionRow.date,
-      totalTime: sessionRow.totalTime ?? undefined,
+      id: getStringValue(sessionRow, 'id'),
+      date: getStringValue(sessionRow, 'date'),
+      ...(totalTime !== undefined && { totalTime }),
       exercises,
-      createdAt: sessionRow.createdAt,
-      updatedAt: sessionRow.updatedAt,
+      createdAt: getStringValue(sessionRow, 'createdAt'),
+      updatedAt: getStringValue(sessionRow, 'updatedAt'),
     };
   }
 
@@ -133,15 +174,20 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     }
 
     const sessions: WorkoutSession[] = [];
-    for (const sessionRow of result.values) {
-      const exercises = await this.getExercisesForSession(sessionRow.id);
+    for (const rawRow of result.values) {
+      const sessionRow = toSQLiteRow(rawRow);
+      const exercises = await this.getExercisesForSession(
+        getStringValue(sessionRow, 'id')
+      );
+      const totalTime = getNumberValue(sessionRow, 'totalTime');
+
       sessions.push({
-        id: sessionRow.id,
-        date: sessionRow.date,
-        totalTime: sessionRow.totalTime ?? undefined,
+        id: getStringValue(sessionRow, 'id'),
+        date: getStringValue(sessionRow, 'date'),
+        ...(totalTime !== undefined && { totalTime }),
         exercises,
-        createdAt: sessionRow.createdAt,
-        updatedAt: sessionRow.updatedAt,
+        createdAt: getStringValue(sessionRow, 'createdAt'),
+        updatedAt: getStringValue(sessionRow, 'updatedAt'),
       });
     }
 
@@ -191,9 +237,10 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
         const exerciseId = generateUUID();
 
         // Calculate maxWeight from sets
-        const maxWeight = exercise.sets.length > 0
-          ? Math.max(...exercise.sets.map(s => s.weight))
-          : null;
+        const maxWeight =
+          exercise.sets.length > 0
+            ? Math.max(...exercise.sets.map((s) => s.weight))
+            : null;
 
         await db.run(
           `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
@@ -215,7 +262,14 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
           await db.run(
             `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+            [
+              setId,
+              exerciseId,
+              set.weight,
+              set.reps,
+              set.completedAt,
+              set.order,
+            ]
           );
         }
       }
@@ -275,7 +329,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     try {
       // Build update query dynamically
       const updates: string[] = [];
-      const values: any[] = [];
+      const values: (string | number | null)[] = [];
 
       if (data.date !== undefined) {
         updates.push('date = ?');
@@ -292,9 +346,10 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
         // Insert new exercises
         for (const exercise of data.exercises) {
           const exerciseId = generateUUID();
-          const maxWeight = exercise.sets.length > 0
-            ? Math.max(...exercise.sets.map(s => s.weight))
-            : null;
+          const maxWeight =
+            exercise.sets.length > 0
+              ? Math.max(...exercise.sets.map((s) => s.weight))
+              : null;
 
           await db.run(
             `INSERT INTO workout_exercises (id, sessionId, exerciseId, exerciseName, bodyPart, maxWeight, "order")
@@ -316,7 +371,14 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
             await db.run(
               `INSERT INTO sets (id, exerciseId, weight, reps, completedAt, "order")
                VALUES (?, ?, ?, ?, ?, ?)`,
-              [setId, exerciseId, set.weight, set.reps, set.completedAt, set.order]
+              [
+                setId,
+                exerciseId,
+                set.weight,
+                set.reps,
+                set.completedAt,
+                set.order,
+              ]
             );
           }
         }
@@ -405,17 +467,26 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       [exerciseName]
     );
 
-    if (!result.values || result.values.length === 0 || result.values[0].maxWeight === null) {
+    if (!result.values || result.values.length === 0) {
       return null;
     }
 
-    return result.values[0].maxWeight as number;
+    const firstRow: unknown = result.values[0];
+    if (firstRow === undefined) {
+      return null;
+    }
+
+    const row = toSQLiteRow(firstRow);
+    const maxWeight = row.maxWeight;
+    return maxWeight !== null ? Number(maxWeight) : null;
   }
 
   /**
    * Helper: Get exercises with sets for a session
    */
-  private async getExercisesForSession(sessionId: string): Promise<WorkoutExercise[]> {
+  private async getExercisesForSession(
+    sessionId: string
+  ): Promise<WorkoutExercise[]> {
     const db = await this.getDb();
 
     const exercisesResult = await db.query(
@@ -428,30 +499,40 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     }
 
     const exercises: WorkoutExercise[] = [];
-    for (const exerciseRow of exercisesResult.values) {
+    for (const rawExerciseRow of exercisesResult.values) {
+      const exerciseRow = toSQLiteRow(rawExerciseRow);
       const setsResult = await db.query(
         'SELECT * FROM sets WHERE exerciseId = ? ORDER BY "order" ASC',
-        [exerciseRow.id]
+        [getStringValue(exerciseRow, 'id')]
       );
 
-      const sets: WorkoutSet[] = (setsResult.values || []).map(setRow => ({
-        id: setRow.id,
-        exerciseId: setRow.exerciseId,
-        weight: setRow.weight,
-        reps: setRow.reps,
-        completedAt: setRow.completedAt,
-        order: setRow.order,
-      }));
+      const sets: WorkoutSet[] = (setsResult.values ?? []).map((rawSetRow) => {
+        const setRow = toSQLiteRow(rawSetRow);
+        return {
+          id: getStringValue(setRow, 'id'),
+          exerciseId: getStringValue(setRow, 'exerciseId'),
+          weight: Number(setRow.weight),
+          reps: Number(setRow.reps),
+          completedAt: getStringValue(setRow, 'completedAt'),
+          order: Number(setRow.order),
+        };
+      });
+
+      const exerciseId =
+        exerciseRow.exerciseId !== null
+          ? getStringValue(exerciseRow, 'exerciseId')
+          : undefined;
+      const maxWeight = getNumberValue(exerciseRow, 'maxWeight');
 
       exercises.push({
-        id: exerciseRow.id,
-        sessionId: exerciseRow.sessionId,
-        exerciseId: exerciseRow.exerciseId ?? undefined,
-        exerciseName: exerciseRow.exerciseName,
-        bodyPart: exerciseRow.bodyPart,
+        id: getStringValue(exerciseRow, 'id'),
+        sessionId: getStringValue(exerciseRow, 'sessionId'),
+        ...(exerciseId !== undefined && { exerciseId }),
+        exerciseName: getStringValue(exerciseRow, 'exerciseName'),
+        bodyPart: getStringValue(exerciseRow, 'bodyPart') as BodyPart,
         sets,
-        maxWeight: exerciseRow.maxWeight ?? undefined,
-        order: exerciseRow.order,
+        ...(maxWeight !== undefined && { maxWeight }),
+        order: Number(exerciseRow.order),
       });
     }
 

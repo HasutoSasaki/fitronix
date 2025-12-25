@@ -350,8 +350,7 @@ export function isBodyPart(value: unknown): value is BodyPart {
  */
 export function isISO8601(value: unknown): value is string {
   if (typeof value !== 'string') return false;
-  const iso8601Regex =
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+  const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
   return iso8601Regex.test(value);
 }
 

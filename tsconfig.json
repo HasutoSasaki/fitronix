@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2024",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2024",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -26,14 +22,6 @@
     "noImplicitReturns": true,
     "noImplicitOverride": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "ios",
-    "android",
-    "specs"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "ios", "android", "specs"]
 }

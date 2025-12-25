@@ -30,6 +30,7 @@ TypeScript 5.7, JavaScript ES2020+: Follow standard conventions
 - 詳細な結果やテスト結果は不要
 
 例:
+
 ```
 fix(storage): contract testの失敗を修正
 

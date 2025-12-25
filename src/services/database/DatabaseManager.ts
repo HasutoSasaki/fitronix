@@ -3,7 +3,11 @@
  * Handles initialization, schema creation, and connection management
  */
 
-import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection } from '@capacitor-community/sqlite';
+import {
+  CapacitorSQLite,
+  SQLiteDBConnection,
+  SQLiteConnection,
+} from '@capacitor-community/sqlite';
 import {
   CREATE_TABLES_SQL,
   CREATE_INDEXES_SQL,
@@ -25,7 +29,8 @@ class DatabaseManager {
   }
 
   public static getInstance(): DatabaseManager {
-    if (!DatabaseManager.instance) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing
+    if (DatabaseManager.instance === undefined) {
       DatabaseManager.instance = new DatabaseManager();
     }
     return DatabaseManager.instance;
@@ -56,7 +61,10 @@ class DatabaseManager {
       );
 
       // Open database
-      await this.db?.open();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (this.db) {
+        await this.db.open();
+      }
 
       // Create tables and indexes
       await this.createTables();
@@ -196,7 +204,9 @@ class DatabaseManager {
 
       try {
         // Import data using CapacitorSQLite API
-        await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
+        await CapacitorSQLite.importFromJson({
+          jsonstring: jsonString,
+        });
 
         // Commit transaction on success
         await this.db.commitTransaction();
@@ -209,7 +219,8 @@ class DatabaseManager {
       if (error instanceof SyntaxError) {
         throw new Error(`Invalid JSON format: ${error.message}`);
       }
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to import database: ${errorMessage}`);
     }
   }

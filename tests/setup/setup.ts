@@ -28,6 +28,6 @@ beforeEach(async () => {
   try {
     await DatabaseManager.clearAllData();
   } catch (error) {
-    // Database may not be initialized in some tests - that's okay
+    console.error(error);
   }
 });

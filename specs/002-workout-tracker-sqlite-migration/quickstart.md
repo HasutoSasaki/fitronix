@@ -9,6 +9,7 @@
 ## Overview
 
 This guide shows you how to:
+
 1. Initialize the SQLite database
 2. Use storage interfaces in your components
 3. Run contract tests
@@ -74,7 +75,7 @@ function App() {
 ```typescript
 // Storage layer calls getConnection(), which auto-initializes
 const storage = new WorkoutSessionStorage();
-const sessions = await storage.getAllSessions();  // DB initialized here if needed
+const sessions = await storage.getAllSessions(); // DB initialized here if needed
 ```
 
 ---
@@ -94,8 +95,8 @@ const session = await storage.createSession({
   date: new Date().toISOString(),
   exercises: [
     {
-      id: 'ex1',  // Temporary ID (will be replaced with UUID)
-      sessionId: '',  // Will be auto-filled
+      id: 'ex1', // Temporary ID (will be replaced with UUID)
+      sessionId: '', // Will be auto-filled
       exerciseName: 'ベンチプレス',
       bodyPart: BodyPart.CHEST,
       sets: [
@@ -121,7 +122,7 @@ console.log('Total sessions:', allSessions.length);
 
 // Get previous max weight
 const maxWeight = await storage.getPreviousMaxWeight('ベンチプレス');
-console.log('Previous max:', maxWeight);  // e.g., 82.5
+console.log('Previous max:', maxWeight); // e.g., 82.5
 ```
 
 ### Exercise Library Storage
@@ -158,11 +159,11 @@ await storage.set('theme', 'dark');
 await storage.set('defaultRestTime', '90');
 
 // Get preference
-const theme = await storage.get('theme');  // 'dark'
+const theme = await storage.get('theme'); // 'dark'
 
 // Get all preferences
 const allPrefs = await storage.getAll();
-console.log(allPrefs);  // { theme: 'dark', defaultRestTime: '90' }
+console.log(allPrefs); // { theme: 'dark', defaultRestTime: '90' }
 ```
 
 ---
@@ -286,6 +287,7 @@ SELECT * FROM schema_version;
 ### Issue: "Database not initialized"
 
 **Error**:
+
 ```
 Error: Database connection is not available
 ```
@@ -301,7 +303,7 @@ const storage = new WorkoutSessionStorage();
 
 // Option 2: Auto-initialization (recommended)
 const storage = new WorkoutSessionStorage();
-await storage.getAllSessions();  // Initializes DB on first call
+await storage.getAllSessions(); // Initializes DB on first call
 ```
 
 ---
@@ -309,6 +311,7 @@ await storage.getAllSessions();  // Initializes DB on first call
 ### Issue: "Constraint violation: weight >= 0"
 
 **Error**:
+
 ```
 Error: CHECK constraint failed: weight >= 0
 ```
@@ -330,6 +333,7 @@ const validateWeight = (weight: number) => {
 ### Issue: "Foreign key constraint failed"
 
 **Error**:
+
 ```
 Error: FOREIGN KEY constraint failed
 ```
@@ -353,6 +357,7 @@ await storage.updateSession(session.id, {
 ### Issue: Tests failing with "table already exists"
 
 **Error**:
+
 ```
 Error: table workout_sessions already exists
 ```
@@ -365,8 +370,8 @@ Error: table workout_sessions already exists
 import DatabaseManager from '../../../src/services/database/DatabaseManager';
 
 beforeEach(async () => {
-  await DatabaseManager.close();  // Close previous connection
-  await DatabaseManager.initialize(':memory:');  // Fresh in-memory DB
+  await DatabaseManager.close(); // Close previous connection
+  await DatabaseManager.initialize(':memory:'); // Fresh in-memory DB
 });
 ```
 
@@ -383,11 +388,13 @@ EXPLAIN QUERY PLAN SELECT * FROM workout_sessions ORDER BY date DESC;
 ```
 
 **Expected Output**:
+
 ```
 SEARCH TABLE workout_sessions USING INDEX idx_workout_sessions_date
 ```
 
 **If index is NOT used**:
+
 - Verify index exists: `.indexes workout_sessions`
 - Rebuild index: `REINDEX idx_workout_sessions_date;`
 - Check SQLite version (should be >= 3.8.0)
@@ -397,6 +404,7 @@ SEARCH TABLE workout_sessions USING INDEX idx_workout_sessions_date
 ### Issue: "Cannot find module '@capacitor-community/sqlite'"
 
 **Error**:
+
 ```
 Module not found: Error: Can't resolve '@capacitor-community/sqlite'
 ```
@@ -411,6 +419,7 @@ npx cap sync
 ```
 
 For iOS:
+
 ```bash
 cd ios/App
 pod install
@@ -418,6 +427,7 @@ cd ../..
 ```
 
 For Android:
+
 ```bash
 npx cap sync android
 ```
@@ -429,6 +439,7 @@ npx cap sync android
 ### TDD Workflow (Recommended)
 
 1. **Red Phase**: Write failing contract test
+
    ```typescript
    it('should return previous max weight', async () => {
      const maxWeight = await storage.getPreviousMaxWeight('ベンチプレス');
@@ -437,6 +448,7 @@ npx cap sync android
    ```
 
 2. **Green Phase**: Implement minimal code to pass
+
    ```typescript
    async getPreviousMaxWeight(exerciseName: string): Promise<number | null> {
      // Minimal implementation (仮実装)
@@ -445,6 +457,7 @@ npx cap sync android
    ```
 
 3. **Refactor Phase**: Improve code quality
+
    ```typescript
    async getPreviousMaxWeight(exerciseName: string): Promise<number | null> {
      const db = await DatabaseManager.getConnection();
@@ -466,17 +479,20 @@ npx cap sync android
 ### ✅ DO
 
 - **Use UUIDs for IDs**: Generate with `uuid` package
+
   ```typescript
   import { v4 as uuidv4 } from 'uuid';
   const id = uuidv4();
   ```
 
 - **Use ISO 8601 for timestamps**:
+
   ```typescript
-  const timestamp = new Date().toISOString();  // '2025-11-29T10:00:00.123Z'
+  const timestamp = new Date().toISOString(); // '2025-11-29T10:00:00.123Z'
   ```
 
 - **Wrap operations in try-catch**:
+
   ```typescript
   try {
     await storage.createSession({ ... });
@@ -496,15 +512,17 @@ npx cap sync android
 ### ❌ DON'T
 
 - **Don't hardcode database name**:
+
   ```typescript
   // ❌ BAD
   await DatabaseManager.initialize('my_database');
 
   // ✅ GOOD
-  await DatabaseManager.initialize();  // Uses default name
+  await DatabaseManager.initialize(); // Uses default name
   ```
 
 - **Don't skip validation**:
+
   ```typescript
   // ❌ BAD
   await storage.createSession({ date: 'invalid-date', ... });
@@ -516,6 +534,7 @@ npx cap sync android
   ```
 
 - **Don't mutate input objects**:
+
   ```typescript
   // ❌ BAD
   async createSession(data) {
@@ -567,10 +586,9 @@ SELECT * FROM workout_exercises WHERE exerciseName = 'ベンチプレス' COLLAT
 const allSessions = await storage.getAllSessions();
 
 // ✅ FAST: Fetches only 20
-const recentSessions = await storage.getSessionsByDateRange(
-  lastMonth,
-  today
-).then(sessions => sessions.slice(0, 20));
+const recentSessions = await storage
+  .getSessionsByDateRange(lastMonth, today)
+  .then((sessions) => sessions.slice(0, 20));
 ```
 
 ---

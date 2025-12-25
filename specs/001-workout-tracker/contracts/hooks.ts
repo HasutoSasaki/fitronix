@@ -5,7 +5,13 @@
  * Defines return types and parameters for data access hooks.
  */
 
-import type { WorkoutSession, Exercise, Set, WorkoutExercise, BodyPart } from '../types/models';
+import type {
+  WorkoutSession,
+  Exercise,
+  Set,
+  WorkoutExercise,
+  BodyPart,
+} from '../types/models';
 
 /**
  * Workout Session Hooks
@@ -17,8 +23,13 @@ export interface UseWorkoutStorageReturn {
   error: Error | null;
   getAllSessions: () => Promise<void>;
   getSessionById: (id: string) => Promise<WorkoutSession | null>;
-  createSession: (session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>) => Promise<WorkoutSession>;
-  updateSession: (id: string, updates: Partial<WorkoutSession>) => Promise<void>;
+  createSession: (
+    session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<WorkoutSession>;
+  updateSession: (
+    id: string,
+    updates: Partial<WorkoutSession>
+  ) => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
   getPreviousMaxWeight: (exerciseName: string) => Promise<number | null>;
 }
@@ -28,7 +39,9 @@ export interface UseActiveWorkoutReturn {
   isRecording: boolean;
   startSession: () => void;
   endSession: () => Promise<void>;
-  addExercise: (exercise: Omit<WorkoutExercise, 'id' | 'sessionId' | 'sets' | 'maxWeight'>) => void;
+  addExercise: (
+    exercise: Omit<WorkoutExercise, 'id' | 'sessionId' | 'sets' | 'maxWeight'>
+  ) => void;
   removeExercise: (exerciseId: string) => void;
   addSet: (exerciseId: string, set: Omit<Set, 'id' | 'completedAt'>) => void;
   removeSet: (setId: string) => void;
@@ -48,7 +61,9 @@ export interface UseExerciseLibraryReturn {
   getAllExercises: () => Promise<void>;
   getExercisesByBodyPart: (bodyPart: BodyPart) => Promise<Exercise[]>;
   searchExercises: (query: string) => Promise<Exercise[]>;
-  createExercise: (exercise: Omit<Exercise, 'id' | 'createdAt'>) => Promise<Exercise>;
+  createExercise: (
+    exercise: Omit<Exercise, 'id' | 'createdAt'>
+  ) => Promise<Exercise>;
   updateExercise: (id: string, updates: Partial<Exercise>) => Promise<void>;
   deleteExercise: (id: string) => Promise<void>;
 }
@@ -74,7 +89,10 @@ export interface UseNotificationsReturn {
   requestPermission: () => Promise<boolean>;
   scheduleNotification: (config: NotificationConfig) => Promise<number>;
   cancelNotification: (id: number) => Promise<void>;
-  updateNotification: (id: number, updates: Partial<NotificationConfig>) => Promise<void>;
+  updateNotification: (
+    id: number,
+    updates: Partial<NotificationConfig>
+  ) => Promise<void>;
 }
 
 export interface NotificationConfig {

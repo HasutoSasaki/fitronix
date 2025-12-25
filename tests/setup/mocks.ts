@@ -5,23 +5,25 @@ const inMemoryStorage = new Map<string, string>();
 
 vi.mock('@capacitor/preferences', () => ({
   Preferences: {
-    get: vi.fn().mockImplementation(async ({ key }: { key: string }) => {
+    get: vi.fn().mockImplementation(({ key }: { key: string }) => {
       const value = inMemoryStorage.get(key) ?? null;
       return { value };
     }),
-    set: vi.fn().mockImplementation(async ({ key, value }: { key: string; value: string }) => {
-      inMemoryStorage.set(key, value);
-      return undefined;
-    }),
-    remove: vi.fn().mockImplementation(async ({ key }: { key: string }) => {
+    set: vi
+      .fn()
+      .mockImplementation(({ key, value }: { key: string; value: string }) => {
+        inMemoryStorage.set(key, value);
+        return undefined;
+      }),
+    remove: vi.fn().mockImplementation(({ key }: { key: string }) => {
       inMemoryStorage.delete(key);
       return undefined;
     }),
-    clear: vi.fn().mockImplementation(async () => {
+    clear: vi.fn().mockImplementation(() => {
       inMemoryStorage.clear();
       return undefined;
     }),
-    keys: vi.fn().mockImplementation(async () => {
+    keys: vi.fn().mockImplementation(() => {
       const keys = Array.from(inMemoryStorage.keys());
       return { keys };
     }),
@@ -34,7 +36,7 @@ const mockDbData = new Map<string, any[]>();
 
 const createMockConnection = () => ({
   open: vi.fn().mockResolvedValue(undefined),
-  execute: vi.fn().mockImplementation(async (sql: string) => {
+  execute: vi.fn().mockImplementation((sql: string) => {
     // Handle table creation
     if (sql.includes('CREATE TABLE')) {
       return { changes: { changes: 0 } };
@@ -45,11 +47,11 @@ const createMockConnection = () => ({
     }
     return { changes: { changes: 0 } };
   }),
-  query: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
+  query: vi.fn().mockImplementation((_sql: string, _values?: any[]) => {
     // Simple mock query responses
     return { values: [] };
   }),
-  run: vi.fn().mockImplementation(async (_sql: string, _values?: any[]) => {
+  run: vi.fn().mockImplementation((_sql: string, _values?: any[]) => {
     return { changes: { changes: 1, lastId: 1 } };
   }),
   close: vi.fn().mockResolvedValue(undefined),
@@ -61,19 +63,17 @@ const createMockConnection = () => ({
 
 vi.mock('@capacitor-community/sqlite', () => ({
   CapacitorSQLite: {
-    createConnection: vi.fn().mockImplementation(async (_options: any) => {
-      if (!mockConnection) {
-        mockConnection = createMockConnection();
-      }
+    createConnection: vi.fn().mockImplementation((_options: any) => {
+      mockConnection ??= createMockConnection();
       return mockConnection;
     }),
-    closeConnection: vi.fn().mockImplementation(async () => {
+    closeConnection: vi.fn().mockImplementation(() => {
       mockConnection = null;
       mockDbData.clear();
       return undefined;
     }),
     isConnection: vi.fn().mockResolvedValue({ result: true }),
-    exportToJson: vi.fn().mockImplementation(async () => {
+    exportToJson: vi.fn().mockImplementation(() => {
       return {
         export: {
           database: 'fitronix.db',
@@ -84,11 +84,13 @@ vi.mock('@capacitor-community/sqlite', () => ({
         },
       };
     }),
-    importFromJson: vi.fn().mockImplementation(async ({ jsonstring }: { jsonstring: string }) => {
-      // Validate JSON format
-      JSON.parse(jsonstring);
-      return { changes: { changes: 0 } };
-    }),
+    importFromJson: vi
+      .fn()
+      .mockImplementation(({ jsonstring }: { jsonstring: string }) => {
+        // Validate JSON format
+        JSON.parse(jsonstring);
+        return { changes: { changes: 0 } };
+      }),
   },
   SQLiteConnection: vi.fn().mockImplementation((sqlite: any) => ({
     createConnection: sqlite.createConnection,

@@ -285,7 +285,9 @@ describe('Contract: IWorkoutSessionStorage', () => {
       });
 
       expect(session.id).toBeTruthy();
-      expect(session.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      expect(session.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
     });
 
     it('sets createdAt and updatedAt timestamps', async () => {
@@ -398,7 +400,9 @@ describe('Contract: IWorkoutSessionStorage', () => {
     });
 
     it('throws error when session not found', async () => {
-      await expect(storage.updateSession('nonexistent', { totalTime: 100 })).rejects.toThrow();
+      await expect(
+        storage.updateSession('nonexistent', { totalTime: 100 })
+      ).rejects.toThrow();
     });
   });
 
@@ -453,8 +457,22 @@ describe('Contract: IWorkoutSessionStorage', () => {
             exerciseName: 'ベンチプレス',
             bodyPart: BodyPart.CHEST,
             sets: [
-              { id: 'set1', exerciseId: 'ex1', weight: 70, reps: 10, completedAt: '2025-11-27T10:05:00.000Z', order: 0 },
-              { id: 'set2', exerciseId: 'ex1', weight: 75, reps: 8, completedAt: '2025-11-27T10:08:00.000Z', order: 1 },
+              {
+                id: 'set1',
+                exerciseId: 'ex1',
+                weight: 70,
+                reps: 10,
+                completedAt: '2025-11-27T10:05:00.000Z',
+                order: 0,
+              },
+              {
+                id: 'set2',
+                exerciseId: 'ex1',
+                weight: 75,
+                reps: 8,
+                completedAt: '2025-11-27T10:08:00.000Z',
+                order: 1,
+              },
             ],
             maxWeight: 75,
             order: 0,
@@ -471,8 +489,22 @@ describe('Contract: IWorkoutSessionStorage', () => {
             exerciseName: 'ベンチプレス',
             bodyPart: BodyPart.CHEST,
             sets: [
-              { id: 'set3', exerciseId: 'ex2', weight: 80, reps: 10, completedAt: '2025-11-28T10:05:00.000Z', order: 0 },
-              { id: 'set4', exerciseId: 'ex2', weight: 82.5, reps: 6, completedAt: '2025-11-28T10:08:00.000Z', order: 1 },
+              {
+                id: 'set3',
+                exerciseId: 'ex2',
+                weight: 80,
+                reps: 10,
+                completedAt: '2025-11-28T10:05:00.000Z',
+                order: 0,
+              },
+              {
+                id: 'set4',
+                exerciseId: 'ex2',
+                weight: 82.5,
+                reps: 6,
+                completedAt: '2025-11-28T10:08:00.000Z',
+                order: 1,
+              },
             ],
             maxWeight: 82.5,
             order: 0,

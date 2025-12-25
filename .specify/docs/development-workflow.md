@@ -55,6 +55,7 @@
 **例**: `001-workout-tracker-spec`
 
 **含まれるファイル**:
+
 ```plaintext
 specs/{feature-number}-{feature-name}/
 ├── spec.md              # /speckit.specify 出力
@@ -70,6 +71,7 @@ specs/{feature-number}-{feature-name}/
 **PRタイミング**: すべての設計ドキュメント生成後
 
 **PRレビューポイント**:
+
 - [ ] 仕様の完全性 (spec.md)
 - [ ] 技術選定の妥当性 (plan.md, research.md)
 - [ ] データモデルの正規化 (data-model.md)
@@ -81,11 +83,13 @@ specs/{feature-number}-{feature-name}/
 ### 2. Phase別ブランチ (実装専用)
 
 **ブランチ命名規則**:
+
 ```plaintext
 {feature-number}-{feature-name}-phase{N}-{phase-name}
 ```
 
 **例**:
+
 - `001-workout-tracker-phase1-setup`
 - `001-workout-tracker-phase2-foundation`
 - `001-workout-tracker-phase3-us6-navigation`
@@ -94,6 +98,7 @@ specs/{feature-number}-{feature-name}/
 **ブランチ作成元**: `main` (spec PRマージ後)
 
 **1つのPhaseブランチに含まれるタスク**:
+
 - Phase 1: T001-T016 (Setup)
 - Phase 2: T017-T038 (Foundational)
 - Phase 3: T039-T051 (US6 Navigation)
@@ -103,6 +108,7 @@ specs/{feature-number}-{feature-name}/
 **PRタイミング**: そのPhaseのすべてのタスク完了後
 
 **PRレビューポイント**:
+
 - [ ] すべてのタスクが完了 (tasks.mdでチェック済み)
 - [ ] TDD準拠 (テストが先、実装が後)
 - [ ] テストカバレッジ ≥80% (憲法要件)
@@ -123,12 +129,14 @@ specs/{feature-number}-{feature-name}/
 **PRタイトル**: `feat(setup): Phase 1 - プロジェクトセットアップ完了`
 
 **PR説明テンプレート**:
+
 ```markdown
 ## 📋 Phase 1: Setup
 
 **タスク範囲**: T001-T016 (16タスク)
 
 ### 完了タスク
+
 - [x] T001: React + TypeScript + Vite初期化
 - [x] T002: 依存関係インストール
 - [x] T003-T005: Zustand, react-window, Vitest
@@ -139,6 +147,7 @@ specs/{feature-number}-{feature-name}/
 - [x] T014-T016: Vitest設定、mocks、TypeScript strict mode
 
 ### 作成ファイル
+
 - package.json (React 19, TypeScript 5.7, Vite 6)
 - tsconfig.json (strict mode)
 - vite.config.ts
@@ -150,12 +159,14 @@ specs/{feature-number}-{feature-name}/
 - capacitor.config.ts
 
 ### 検証
+
 - [ ] `npm install` 成功
 - [ ] `npm run dev` 起動
 - [ ] `npm run test` 実行可能
 - [ ] `npm run lint` エラーなし
 
 ### 次のPhase
+
 Phase 2: Foundational (T017-T038)
 ```
 
@@ -172,35 +183,43 @@ Phase 2: Foundational (T017-T038)
 **PRタイトル**: `feat(foundation): Phase 2 - 基盤レイヤー完了 (TDD)`
 
 **PR説明テンプレート**:
+
 ```markdown
 ## 📋 Phase 2: Foundational
 
 **タスク範囲**: T017-T038 (22タスク)
 
 ### TDD フロー
+
 1. **Red Phase** (T024-T027): Contract tests (失敗)
 2. **Green Phase** (T028-T030): 仮実装 (テスト通過)
 3. **Refactor Phase** (T031-T032): 品質改善
 
 ### 完了タスク
+
 **型定義** (T017-T023):
+
 - [x] WorkoutSession, WorkoutExercise, Set
 - [x] Exercise, BodyPart, TimerPreset, TimerState
 
 **Storage Layer** (T024-T032):
+
 - [x] Contract tests (Preferences, WorkoutSession, ExerciseLibrary)
 - [x] 仮実装 (PreferencesStorage, WorkoutSessionStorage, ExerciseLibraryStorage)
 - [x] Refactor (エラーハンドリング、検証)
 
 **Shared UI** (T033-T038):
+
 - [x] Button, InputField, Modal
 - [x] LoadingSpinner, EmptyState, ErrorMessage
 
 ### テストカバレッジ
+
 - Contract tests: 100% (全インターフェース検証済み)
 - Unit tests: ≥80%
 
 ### 次のPhase
+
 Phase 3: US6 Navigation (T039-T051) - MVP基盤
 ```
 
@@ -215,6 +234,7 @@ Phase 3: US6 Navigation (T039-T051) - MVP基盤
 **PRタイトル**: `feat(us6): Phase 3 - ナビゲーション実装 (MVP基盤)`
 
 **Independent Test**:
+
 > アプリ起動→タブバーで「履歴」タップ→履歴画面表示→「ライブラリ」タップ→ライブラリ画面表示→「記録」タップ→記録画面表示、の流れがスムーズに動作することを確認
 
 ---
@@ -228,6 +248,7 @@ Phase 3: US6 Navigation (T039-T051) - MVP基盤
 **PRタイトル**: `feat(us1): Phase 4 - ワークアウト記録実装 (MVP完成) 🎯`
 
 **Independent Test**:
+
 > ユーザーが新規セッションを開始→部位選択→種目選択→重量とレップ数入力→保存、の一連の流れを完了でき、保存したデータがアプリ再起動後も残っていることを確認できる
 
 **MVP Checkpoint**: ✅ このPhase完了でMVP動作可能
@@ -290,7 +311,7 @@ git checkout -b 001-workout-tracker-phase2-foundation
 ```markdown
 - [x] T001 Initialize React + TypeScript + Vite project
 - [x] T002 Install core dependencies
-- [ ] T003 Install Zustand 5 for state management  ← 次のタスク
+- [ ] T003 Install Zustand 5 for state management ← 次のタスク
 ```
 
 ### Phase完了チェックリスト
@@ -311,11 +332,13 @@ git checkout -b 001-workout-tracker-phase2-foundation
 ### Phase 2完了後
 
 **並列実行可能なPhase**:
+
 - Phase 3: US6 (Navigation)
 - Phase 6: US3 (Timer)
 - Phase 8: US5 (Library)
 
 **依存関係あり** (順次実行):
+
 - Phase 4: US1 (Recording) - Phase 3の後
 - Phase 5: US2 (Keypad) - Phase 4の後
 - Phase 7: US4 (History) - Phase 4の後
@@ -327,6 +350,7 @@ git checkout -b 001-workout-tracker-phase2-foundation
 ### MVP = Phase 1 + 2 + 3 + 4 (73タスク)
 
 **マージ順序**:
+
 1. `001-workout-tracker-spec` → main
 2. `001-workout-tracker-phase1-setup` → main
 3. `001-workout-tracker-phase2-foundation` → main
@@ -334,6 +358,7 @@ git checkout -b 001-workout-tracker-phase2-foundation
 5. `001-workout-tracker-phase4-us1-recording` → main ✅ **MVP完成**
 
 **MVP完成後のデモ**:
+
 - iOS Simulatorで動作確認
 - Android Emulatorで動作確認
 - 基本的なワークアウト記録フロー完遂
@@ -377,6 +402,7 @@ git checkout -b 001-workout-tracker-phase2-foundation
 ---
 
 **このワークフローに従うことで**:
+
 - ✅ レビュー可能なPRサイズ
 - ✅ 段階的なデリバリー
 - ✅ 失敗時のロールバック容易

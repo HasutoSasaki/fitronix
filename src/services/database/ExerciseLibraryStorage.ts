@@ -4,12 +4,34 @@
  */
 
 import type { IExerciseLibraryStorage } from '../../../specs/002-workout-tracker-sqlite-migration/contracts/storage';
-import type {
-  Exercise,
-  BodyPart,
-} from '../../types/models';
+import type { Exercise, BodyPart } from '../../types/models';
 import { generateUUID, getCurrentTimestamp } from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
+import type { SQLiteRow } from './types';
+
+/**
+ * Helper function to safely convert unknown to SQLiteRow
+ */
+function toSQLiteRow(value: unknown): SQLiteRow {
+  return value as SQLiteRow;
+}
+
+/**
+ * Helper function to safely convert SQLiteRow to Exercise
+ */
+function rowToExercise(row: SQLiteRow): Exercise {
+  const videoUrl = row.videoUrl;
+  const lastUsed = row.lastUsed;
+
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    bodyPart: String(row.bodyPart) as BodyPart,
+    ...(videoUrl !== null && { videoUrl: String(videoUrl) }),
+    createdAt: String(row.createdAt),
+    ...(lastUsed !== null && { lastUsed: String(lastUsed) }),
+  };
+}
 
 export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   private async getDb() {
@@ -41,14 +63,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   /**
@@ -60,24 +75,17 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   async getExerciseById(id: string): Promise<Exercise | null> {
     const db = await this.getDb();
 
-    const result = await db.query(
-      'SELECT * FROM exercises WHERE id = ?',
-      [id]
-    );
+    const result = await db.query('SELECT * FROM exercises WHERE id = ?', [id]);
 
     if (!result.values || result.values.length === 0) {
       return null;
     }
 
-    const row = result.values[0];
-    return {
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    };
+    const firstRow: unknown = result.values[0];
+    if (firstRow === undefined) {
+      return null;
+    }
+    return rowToExercise(toSQLiteRow(firstRow));
   }
 
   /**
@@ -100,14 +108,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   async searchExercises(query: string): Promise<Exercise[]> {
@@ -115,12 +116,12 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     // Escape SQL wildcards to prevent unintended pattern matching
     const escapedQuery = query
-      .replace(/\\/g, '\\\\')  // Escape backslash first
-      .replace(/%/g, '\\%')    // Escape percent
-      .replace(/_/g, '\\_');   // Escape underscore
+      .replace(/\\/g, '\\\\') // Escape backslash first
+      .replace(/%/g, '\\%') // Escape percent
+      .replace(/_/g, '\\_'); // Escape underscore
 
     const result = await db.query(
-      'SELECT * FROM exercises WHERE name LIKE ? ESCAPE \'\\\' COLLATE NOCASE ORDER BY lastUsed DESC',
+      "SELECT * FROM exercises WHERE name LIKE ? ESCAPE '\\' COLLATE NOCASE ORDER BY lastUsed DESC",
       [`%${escapedQuery}%`]
     );
 
@@ -128,14 +129,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   /**
@@ -201,7 +195,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     // Build update query dynamically
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | null)[] = [];
 
     if (data.name !== undefined) {
       updates.push('name = ?');
@@ -268,9 +262,9 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   async updateLastUsed(id: string, timestamp: string): Promise<void> {
     const db = await this.getDb();
 
-    await db.run(
-      'UPDATE exercises SET lastUsed = ? WHERE id = ?',
-      [timestamp, id]
-    );
+    await db.run('UPDATE exercises SET lastUsed = ? WHERE id = ?', [
+      timestamp,
+      id,
+    ]);
   }
 }

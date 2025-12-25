@@ -9,20 +9,21 @@
  * 4. データ操作の一貫性が保たれること
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { type SQLiteDBConnection } from '@capacitor-community/sqlite';
 import DatabaseManager from '../../src/services/database/DatabaseManager';
 import { WorkoutSessionStorage } from '../../src/services/database/WorkoutSessionStorage';
-import { BodyPart } from '../../src/types/models';
 
 describe('Database Initialization Concurrency Safety', () => {
   // テスト用のインメモリデータベース名を使用
   const TEST_DB_NAME = ':memory:';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let storage: WorkoutSessionStorage;
 
   beforeEach(async () => {
     // DatabaseManagerインスタンスをリセット
     await DatabaseManager.close();
-    
+
     // テストごとに新しいストレージインスタンスを作成
     storage = new WorkoutSessionStorage();
   });
@@ -31,7 +32,7 @@ describe('Database Initialization Concurrency Safety', () => {
     try {
       await DatabaseManager.close();
     } catch (error) {
-      // クリーンアップエラーは無視
+      console.error(error);
     }
   });
 
@@ -52,7 +53,7 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // すべての接続が同じインスタンスであることを確認
       const firstConnection = connections[0];
-      connections.forEach(connection => {
+      connections.forEach((connection) => {
         expect(connection).toBe(firstConnection);
       });
 
@@ -77,13 +78,16 @@ describe('Database Initialization Concurrency Safety', () => {
       expect(results[0]).toBeUndefined(); // initialize returns void
       expect(results[1]).toBeDefined(); // connection
       expect(results[2]).toBeDefined(); // connection
-      expect(results[3]).toBeUndefined(); // initialize returns void  
+      expect(results[3]).toBeUndefined(); // initialize returns void
       expect(results[4]).toBeDefined(); // connection
 
       // すべての接続が同じインスタンスであることを確認
-      const connections = results.slice(1, 2).concat(results.slice(2, 3)).concat(results.slice(4));
+      const connections = results
+        .slice(1, 2)
+        .concat(results.slice(2, 3))
+        .concat(results.slice(4));
       const firstConnection = connections[0];
-      connections.forEach(connection => {
+      connections.forEach((connection) => {
         if (connection) {
           expect(connection).toBe(firstConnection);
         }
@@ -163,11 +167,11 @@ describe('Database Initialization Concurrency Safety', () => {
       // 基本的なクエリ操作が並行実行できることを確認
       const queryResults = await Promise.all([
         connectionPromises[0].query('SELECT 1'),
-        connectionPromises[1].query('SELECT 2'), 
+        connectionPromises[1].query('SELECT 2'),
         connectionPromises[2].query('SELECT 3'),
       ]);
 
-      queryResults.forEach(result => {
+      queryResults.forEach((result) => {
         expect(result).toBeDefined();
         expect(result.values).toEqual([]);
       });
@@ -186,17 +190,19 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // すべての接続が同じインスタンスであることを確認
       const firstConnection = connections[0];
-      connections.forEach(connection => {
+      connections.forEach((connection) => {
         expect(connection).toBe(firstConnection);
       });
 
       // 並行クエリ実行の安定性テスト
-      const queryPromises = connections.slice(0, 50).map((connection, index) =>
-        connection.query(`SELECT ${index} as value`)
-      );
+      const queryPromises = connections
+        .slice(0, 50)
+        .map((connection, index) =>
+          connection.query(`SELECT ${index} as value`)
+        );
 
       const queryResults = await Promise.all(queryPromises);
-      queryResults.forEach(result => {
+      queryResults.forEach((result) => {
         expect(result).toBeDefined();
         expect(result.values).toEqual([]);
       });
@@ -207,7 +213,6 @@ describe('Database Initialization Concurrency Safety', () => {
     it('再初期化が正常に動作すること', async () => {
       // 初回の初期化
       await DatabaseManager.initialize(TEST_DB_NAME);
-      const firstConnection = await DatabaseManager.getConnection();
 
       // 接続をクローズ
       await DatabaseManager.close();
@@ -246,7 +251,7 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // 接続は正常に取得できる
       if (results[4].status === 'fulfilled') {
-        const connection = results[4].value;
+        const connection = results[4].value as SQLiteDBConnection;
         const result = await connection.query('SELECT 1 as stability_test');
         expect(result.values).toEqual([]);
       }
@@ -275,20 +280,24 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // すべての接続が同じインスタンスであること
       const firstConnection = connections[0];
-      connections.forEach(connection => {
+      connections.forEach((connection) => {
         expect(connection).toBe(firstConnection);
       });
 
       // 基本的なクエリ操作が正常に動作すること
-      const result = await firstConnection.query('SELECT name FROM sqlite_master');
+      const result = await firstConnection.query(
+        'SELECT name FROM sqlite_master'
+      );
       expect(result.values).toEqual([]);
     });
 
     it('並行初期化後にデータベース接続の状態が正常であること', async () => {
       // 並行初期化
-      await Promise.all(Array.from({ length: 10 }, () =>
-        DatabaseManager.initialize(TEST_DB_NAME)
-      ));
+      await Promise.all(
+        Array.from({ length: 10 }, () =>
+          DatabaseManager.initialize(TEST_DB_NAME)
+        )
+      );
 
       // 接続の取得と基本操作の確認
       const connection = await DatabaseManager.getConnection();
@@ -311,7 +320,7 @@ describe('Database Initialization Concurrency Safety', () => {
   describe('パフォーマンスと安定性テスト', () => {
     it('大量の並行リクエストが合理的な時間内に完了すること', async () => {
       const startTime = Date.now();
-      
+
       // 200個の並行リクエスト（初期化と接続の混合）
       const promises = [];
       for (let i = 0; i < 100; i++) {
@@ -322,7 +331,7 @@ describe('Database Initialization Concurrency Safety', () => {
       }
 
       await Promise.all(promises);
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
 
@@ -352,12 +361,13 @@ describe('Database Initialization Concurrency Safety', () => {
       }
 
       const finalMemory = process.memoryUsage();
-      
+
       // メモリ使用量が大幅に増加していないことを確認
       // （厳密なリークテストではなく、基本的な安定性チェック）
       const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
-      const memoryIncreasePercent = (memoryIncrease / initialMemory.heapUsed) * 100;
-      
+      const memoryIncreasePercent =
+        (memoryIncrease / initialMemory.heapUsed) * 100;
+
       // メモリ増加が初期値の200%以下であることを確認（緩い制限）
       expect(memoryIncreasePercent).toBeLessThan(200);
     });

@@ -25,6 +25,7 @@ npm install
 ```
 
 This installs:
+
 - React 19.x (最新安定版)
 - TypeScript 5.7.x (最新)
 - Vite 6.x (最新ビルドツール)
@@ -40,6 +41,7 @@ npx cap init
 ```
 
 When prompted:
+
 - **App name**: Workout Tracker
 - **App ID**: com.fitronix.workouttracker
 - **Web directory**: dist
@@ -93,12 +95,14 @@ npm run build
 ### Steps
 
 1. **Sync web assets to iOS project**:
+
    ```bash
    npm run build
    npx cap sync ios
    ```
 
 2. **Open iOS project in Xcode**:
+
    ```bash
    npx cap open ios
    ```
@@ -129,12 +133,14 @@ npm run build
 ### Steps
 
 1. **Sync web assets to Android project**:
+
    ```bash
    npm run build
    npx cap sync android
    ```
 
 2. **Open Android project in Android Studio**:
+
    ```bash
    npx cap open android
    ```
@@ -298,6 +304,7 @@ npx cap ls
 Follow strict TDD methodology:
 
 1. **Red**: Write a failing test
+
    ```bash
    # Create test file: tests/unit/services/storage.test.ts
    npm run test
@@ -305,12 +312,14 @@ Follow strict TDD methodology:
    ```
 
 2. **Green**: Write minimal code to pass
+
    ```typescript
    // Implement in src/services/storage.ts
    // Just enough to make test pass (仮実装)
    ```
 
 3. **Refactor**: Improve code quality
+
    ```typescript
    // Clean up code while keeping tests green
    // Apply DRY, meaningful naming, etc.
@@ -336,7 +345,10 @@ Follow strict TDD methodology:
 import { Preferences } from '@capacitor/preferences';
 
 // Set value
-await Preferences.set({ key: 'workoutSessions', value: JSON.stringify(sessions) });
+await Preferences.set({
+  key: 'workoutSessions',
+  value: JSON.stringify(sessions),
+});
 
 // Get value
 const { value } = await Preferences.get({ key: 'workoutSessions' });
@@ -355,22 +367,27 @@ const permission = await LocalNotifications.requestPermissions();
 // Schedule notification
 const notificationId = 1;
 await LocalNotifications.schedule({
-  notifications: [{
-    id: notificationId,
-    title: '休憩タイマー',
-    body: '残り 60秒',
-    ongoing: true,
-    actions: [
-      { id: 'pause', title: '一時停止' },
-      { id: 'skip', title: 'スキップ' }
-    ]
-  }]
+  notifications: [
+    {
+      id: notificationId,
+      title: '休憩タイマー',
+      body: '残り 60秒',
+      ongoing: true,
+      actions: [
+        { id: 'pause', title: '一時停止' },
+        { id: 'skip', title: 'スキップ' },
+      ],
+    },
+  ],
 });
 
 // Listen to actions
-await LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
-  console.log('Action performed:', action.actionId);
-});
+await LocalNotifications.addListener(
+  'localNotificationActionPerformed',
+  (action) => {
+    console.log('Action performed:', action.actionId);
+  }
+);
 ```
 
 ---
@@ -454,6 +471,7 @@ After setup, follow this implementation order:
 ## Support
 
 For issues or questions:
+
 1. Check specs and contracts in `specs/001-workout-tracker/`
 2. Review research findings in `research.md`
 3. Consult constitution v1.1.0 in `.specify/memory/constitution.md`

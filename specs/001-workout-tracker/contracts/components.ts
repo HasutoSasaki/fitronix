@@ -6,7 +6,13 @@
  */
 
 import type { ReactNode } from 'react';
-import type { WorkoutSession, Exercise, Set as WorkoutSet, WorkoutExercise, BodyPart } from '../types/models';
+import type {
+  WorkoutSession,
+  Exercise,
+  Set as WorkoutSet,
+  WorkoutExercise,
+  BodyPart,
+} from '../types/models';
 
 /**
  * Workout Recording Components
@@ -19,9 +25,14 @@ export interface WorkoutRecordingScreenProps {
 
 export interface ExerciseInputProps {
   exercises: WorkoutExercise[];
-  onAddExercise: (exercise: Omit<WorkoutExercise, 'id' | 'sessionId' | 'sets' | 'maxWeight'>) => void;
+  onAddExercise: (
+    exercise: Omit<WorkoutExercise, 'id' | 'sessionId' | 'sets' | 'maxWeight'>
+  ) => void;
   onRemoveExercise: (exerciseId: string) => void;
-  onUpdateExercise: (exerciseId: string, updates: Partial<WorkoutExercise>) => void;
+  onUpdateExercise: (
+    exerciseId: string,
+    updates: Partial<WorkoutExercise>
+  ) => void;
 }
 
 export interface SetInputProps {
