@@ -11,11 +11,7 @@
  * - Type-safe: Leverage TypeScript for compile-time safety
  */
 
-import type {
-  WorkoutSession,
-  Exercise,
-  BodyPart,
-} from '../types/models';
+import type { WorkoutSession, Exercise, BodyPart } from '../types/models';
 
 /**
  * Workout Session Storage Contract
@@ -195,6 +191,18 @@ export interface IExerciseLibraryStorage {
   getExercisesByBodyPart(bodyPart: BodyPart): Promise<Exercise[]>;
 
   /**
+   * Search exercises by name (partial match, case-insensitive)
+   *
+   * @param query - Search query string
+   * @returns Exercises matching the query, sorted by lastUsed descending
+   *
+   * @example
+   * const results = await storage.searchExercises('ベンチ');
+   * // Returns: [{ name: 'ベンチプレス', ... }, { name: 'インクラインベンチプレス', ... }]
+   */
+  searchExercises(query: string): Promise<Exercise[]>;
+
+  /**
    * Create a new exercise in library
    *
    * Auto-generates UUID and sets createdAt timestamp.
@@ -250,8 +258,22 @@ export interface IExerciseLibraryStorage {
    */
   deleteExercise(id: string): Promise<void>;
 
+  /**
+   * Mark an exercise as used by updating its lastUsed timestamp
+   *
+   * Searches for exercise by name (case-insensitive) and updates lastUsed to current time.
+   * If multiple exercises have the same name, only the first match is updated.
+   * Does nothing if no exercise with the name is found (idempotent).
+   *
+   * @param exerciseName - Exercise name (case-insensitive)
+   * @returns Promise<void>
+   *
+   * @example
+   * await storage.markExerciseAsUsed('ベンチプレス');
+   * // Updates lastUsed timestamp for 'ベンチプレス' exercise
+   */
+  markExerciseAsUsed(exerciseName: string): Promise<void>;
 }
-
 
 /**
  * Type Guards
