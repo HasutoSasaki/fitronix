@@ -237,6 +237,10 @@ CHECK(reps >= 1)    -- At least 1 rep
 | `createdAt` | TEXT | NOT NULL    | Creation timestamp (ISO 8601)        |
 | `lastUsed`  | TEXT | NULL        | Last time used in workout (ISO 8601) |
 
+**Constraints**:
+
+- `UNIQUE(name, bodyPart)` - Prevent duplicate exercise names within same body part
+
 **Indexes**:
 
 - `idx_exercises_bodyPart` on `bodyPart` - Filter by body part
@@ -249,7 +253,8 @@ CHECK(reps >= 1)    -- At least 1 rep
 
 **Business Rules**:
 
-- `name` can be duplicated (user may have "Barbell Bench Press" and "Dumbbell Bench Press")
+- `name` must be unique per `bodyPart` (enforced by UNIQUE constraint)
+- Different `bodyPart` can have same `name` (e.g., "プレス" for chest and shoulders)
 - `lastUsed` is updated whenever the exercise is used in a workout
 - `videoUrl` is optional - user can add reference videos (e.g., YouTube)
 - Library exercises are never deleted automatically (user controls deletion)

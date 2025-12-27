@@ -191,7 +191,7 @@ Reusable exercise definition in user's library.
 
 **Validation Rules**:
 
-- `name`: 1-100 characters. Duplicates within same `bodyPart` are allowed but UI should warn user
+- `name`: 1-100 characters, must be unique per `bodyPart` (enforced by database UNIQUE constraint)
 - `videoUrl`: Must be valid URL format (http/https) or empty
 
 **Example**:
@@ -320,16 +320,16 @@ Timer state (not persisted to storage, only in Zustand).
 
 ## Validation Rules Summary
 
-| Entity          | Field          | Rule                             |
-| --------------- | -------------- | -------------------------------- |
-| WorkoutSession  | `date`         | ISO 8601 timestamp               |
-| WorkoutSession  | `exercises`    | Min 1 exercise                   |
-| WorkoutExercise | `exerciseName` | 1-100 chars                      |
-| WorkoutExercise | `bodyPart`     | Valid enum value                 |
-| Set             | `weight`       | >= 0, allows decimals            |
-| Set             | `reps`         | >= 1, integer only               |
-| Exercise        | `name`         | 1-100 chars, unique per bodyPart |
-| Exercise        | `videoUrl`     | Valid URL or empty               |
+| Entity          | Field          | Rule                                                   |
+| --------------- | -------------- | ------------------------------------------------------ |
+| WorkoutSession  | `date`         | ISO 8601 timestamp                                     |
+| WorkoutSession  | `exercises`    | Min 1 exercise                                         |
+| WorkoutExercise | `exerciseName` | 1-100 chars                                            |
+| WorkoutExercise | `bodyPart`     | Valid enum value                                       |
+| Set             | `weight`       | >= 0, allows decimals                                  |
+| Set             | `reps`         | >= 1, integer only                                     |
+| Exercise        | `name`         | 1-100 chars, unique per `bodyPart` (UNIQUE constraint) |
+| Exercise        | `videoUrl`     | Valid URL or empty                                     |
 
 ---
 
