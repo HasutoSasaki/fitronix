@@ -77,10 +77,7 @@ describe('Database Initialization Concurrency Safety', () => {
       expect(results[4]).toBeDefined(); // connection
 
       // すべての接続が同じインスタンスであることを確認
-      const connections = results
-        .slice(1, 2)
-        .concat(results.slice(2, 3))
-        .concat(results.slice(4));
+      const connections = [results[1], results[2], results[4]];
       const firstConnection = connections[0];
       connections.forEach((connection) => {
         if (connection) {
