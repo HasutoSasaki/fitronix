@@ -24,10 +24,12 @@ beforeEach(async () => {
   // Clear Preferences storage
   await Preferences.clear();
 
-  // Clear SQLite database if initialized
+  // Recreate SQLite tables with latest schema (applies new constraints)
+  // This ensures UNIQUE constraints and other schema changes are applied
   try {
-    await DatabaseManager.clearAllData();
+    await DatabaseManager.recreateTables();
   } catch (error) {
+    // Ignore errors if database is not initialized yet
     console.error(error);
   }
 });

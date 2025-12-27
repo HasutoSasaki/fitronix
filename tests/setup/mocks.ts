@@ -30,35 +30,90 @@ vi.mock('@capacitor/preferences', () => ({
   },
 }));
 
-// Mock @capacitor-community/sqlite for in-memory testing
+// Mock @capacitor-community/sqlite with sql.js (real SQLite in memory)
+import initSqlJs, { Database } from 'sql.js';
+
+let sqlJsDb: Database | null = null;
 let mockConnection: any = null;
-const mockDbData = new Map<string, any[]>();
+
+async function initSqlJsDb() {
+  if (!sqlJsDb) {
+    const SQL = await initSqlJs({
+      // Use local node_modules path for WASM file
+      locateFile: (file) => `node_modules/sql.js/dist/${file}`,
+    });
+    sqlJsDb = new SQL.Database();
+  }
+  return sqlJsDb;
+}
 
 const createMockConnection = () => ({
-  open: vi.fn().mockResolvedValue(undefined),
-  execute: vi.fn().mockImplementation((sql: string) => {
-    // Handle table creation
-    if (sql.includes('CREATE TABLE')) {
-      return { changes: { changes: 0 } };
-    }
-    // Handle INSERT statements
-    if (sql.toUpperCase().includes('INSERT INTO schema_version')) {
-      return { changes: { changes: 1 } };
-    }
+  open: vi.fn().mockImplementation(async () => {
+    await initSqlJsDb();
+    return undefined;
+  }),
+  execute: vi.fn().mockImplementation(async (sql: string) => {
+    const db = await initSqlJsDb();
+    db.exec(sql);
     return { changes: { changes: 0 } };
   }),
-  query: vi.fn().mockImplementation((_sql: string, _values?: any[]) => {
-    // Simple mock query responses
-    return { values: [] };
+  query: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+    const db = await initSqlJsDb();
+
+    try {
+      const stmt = db.prepare(sql);
+      if (values && values.length > 0) {
+        stmt.bind(values);
+      }
+
+      const results: any[] = [];
+      while (stmt.step()) {
+        results.push(stmt.getAsObject());
+      }
+      stmt.free();
+
+      return { values: results };
+    } catch (error) {
+      console.error('SQL query error:', error);
+      return { values: [] };
+    }
   }),
-  run: vi.fn().mockImplementation((_sql: string, _values?: any[]) => {
-    return { changes: { changes: 1, lastId: 1 } };
+  run: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {
+    const db = await initSqlJsDb();
+
+    const stmt = db.prepare(sql);
+    if (values && values.length > 0) {
+      stmt.bind(values);
+    }
+    stmt.step();
+    const changes = db.getRowsModified();
+    stmt.free();
+
+    return { changes: { changes, lastId: changes } };
   }),
-  close: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockImplementation(() => {
+    if (sqlJsDb) {
+      sqlJsDb.close();
+      sqlJsDb = null;
+    }
+    return undefined;
+  }),
   isDBOpen: vi.fn().mockResolvedValue({ result: true }),
-  beginTransaction: vi.fn().mockResolvedValue(undefined),
-  commitTransaction: vi.fn().mockResolvedValue(undefined),
-  rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+  beginTransaction: vi.fn().mockImplementation(async () => {
+    const db = await initSqlJsDb();
+    db.exec('BEGIN TRANSACTION');
+    return undefined;
+  }),
+  commitTransaction: vi.fn().mockImplementation(async () => {
+    const db = await initSqlJsDb();
+    db.exec('COMMIT');
+    return undefined;
+  }),
+  rollbackTransaction: vi.fn().mockImplementation(async () => {
+    const db = await initSqlJsDb();
+    db.exec('ROLLBACK');
+    return undefined;
+  }),
 });
 
 vi.mock('@capacitor-community/sqlite', () => ({
@@ -69,7 +124,10 @@ vi.mock('@capacitor-community/sqlite', () => ({
     }),
     closeConnection: vi.fn().mockImplementation(() => {
       mockConnection = null;
-      mockDbData.clear();
+      if (sqlJsDb) {
+        sqlJsDb.close();
+        sqlJsDb = null;
+      }
       return undefined;
     }),
     isConnection: vi.fn().mockResolvedValue({ result: true }),
