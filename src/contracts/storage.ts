@@ -193,6 +193,11 @@ export interface IExerciseLibraryStorage {
   /**
    * Search exercises by name (partial match, case-insensitive)
    *
+   * **Implementation Requirement**: Implementations MUST perform case-insensitive
+   * comparison for ASCII/English characters (e.g., "Bench" matches "bench").
+   * For SQLite implementations, use `COLLATE NOCASE` in queries. Note that Japanese
+   * and other non-ASCII scripts are compared as-is (they have no case concept).
+   *
    * @param query - Search query string
    * @returns Exercises matching the query, sorted by lastUsed descending
    *
@@ -262,8 +267,13 @@ export interface IExerciseLibraryStorage {
    * Mark an exercise as used by updating its lastUsed timestamp
    *
    * Searches for exercise by name (case-insensitive) and updates lastUsed to current time.
-   * If multiple exercises have the same name, only the first match is updated.
+   * If multiple exercises have the same name, only the first match (ordered by createdAt ascending) is updated.
    * Does nothing if no exercise with the name is found (idempotent).
+   *
+   * **Implementation Requirement**: Implementations MUST perform case-insensitive
+   * comparison for ASCII/English characters (e.g., "Bench Press" matches "bench press").
+   * For SQLite implementations, use `COLLATE NOCASE` in queries. Note that Japanese
+   * and other non-ASCII scripts are compared as-is (they have no case concept).
    *
    * @param exerciseName - Exercise name (case-insensitive)
    * @returns Promise<void>
