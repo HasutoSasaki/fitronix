@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS exercises (
   bodyPart TEXT NOT NULL,
   videoUrl TEXT,
   createdAt TEXT NOT NULL,
-  lastUsed TEXT
+  lastUsed TEXT,
+  UNIQUE(name, bodyPart)
 );
 `;
 

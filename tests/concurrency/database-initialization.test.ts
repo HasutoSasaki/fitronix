@@ -17,15 +17,10 @@ import { WorkoutSessionStorage } from '../../src/services/database/WorkoutSessio
 describe('Database Initialization Concurrency Safety', () => {
   // テスト用のインメモリデータベース名を使用
   const TEST_DB_NAME = ':memory:';
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let storage: WorkoutSessionStorage;
 
   beforeEach(async () => {
     // DatabaseManagerインスタンスをリセット
     await DatabaseManager.close();
-
-    // テストごとに新しいストレージインスタンスを作成
-    storage = new WorkoutSessionStorage();
   });
 
   afterEach(async () => {
@@ -57,9 +52,9 @@ describe('Database Initialization Concurrency Safety', () => {
         expect(connection).toBe(firstConnection);
       });
 
-      // 基本的なクエリが実行できることを確認（モック環境では空の結果を返す）
+      // 基本的なクエリが実行できることを確認
       const result = await firstConnection.query('SELECT 1 as test');
-      expect(result.values).toEqual([]);
+      expect(result.values).toEqual([{ test: 1 }]);
     });
 
     it('初期化中に接続リクエストがあっても正常に処理されること', async () => {
@@ -171,10 +166,12 @@ describe('Database Initialization Concurrency Safety', () => {
         connectionPromises[2].query('SELECT 3'),
       ]);
 
-      queryResults.forEach((result) => {
-        expect(result).toBeDefined();
-        expect(result.values).toEqual([]);
-      });
+      expect(queryResults[0]).toBeDefined();
+      expect(queryResults[0].values).toEqual([{ '1': 1 }]);
+      expect(queryResults[1]).toBeDefined();
+      expect(queryResults[1].values).toEqual([{ '2': 2 }]);
+      expect(queryResults[2]).toBeDefined();
+      expect(queryResults[2].values).toEqual([{ '3': 3 }]);
     });
 
     it('並行接続リクエストが同じインスタンスを返すことを確認', async () => {
@@ -202,9 +199,9 @@ describe('Database Initialization Concurrency Safety', () => {
         );
 
       const queryResults = await Promise.all(queryPromises);
-      queryResults.forEach((result) => {
+      queryResults.forEach((result, index) => {
         expect(result).toBeDefined();
-        expect(result.values).toEqual([]);
+        expect(result.values).toEqual([{ value: index }]);
       });
     });
   });
@@ -227,7 +224,7 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // 基本的なクエリ操作が正常に動作することを確認
       const result = await secondConnection.query('SELECT 1 as recovery_test');
-      expect(result.values).toEqual([]);
+      expect(result.values).toEqual([{ recovery_test: 1 }]);
     });
 
     it('並行初期化が安全に処理されること', async () => {
@@ -253,7 +250,7 @@ describe('Database Initialization Concurrency Safety', () => {
       if (results[4].status === 'fulfilled') {
         const connection = results[4].value as SQLiteDBConnection;
         const result = await connection.query('SELECT 1 as stability_test');
-        expect(result.values).toEqual([]);
+        expect(result.values).toEqual([{ stability_test: 1 }]);
       }
     });
   });
@@ -286,9 +283,21 @@ describe('Database Initialization Concurrency Safety', () => {
 
       // 基本的なクエリ操作が正常に動作すること
       const result = await firstConnection.query(
-        'SELECT name FROM sqlite_master'
+        "SELECT name FROM sqlite_master WHERE type='table'"
       );
-      expect(result.values).toEqual([]);
+      expect(result.values).toBeDefined();
+      if (!result.values) {
+        throw new Error('Expected result.values to be defined');
+      }
+      expect(result.values.length).toBeGreaterThan(0);
+
+      // 必須テーブルの存在確認
+      const tableNames = result.values.map((row: any) => row.name);
+      expect(tableNames).toContain('exercises');
+      expect(tableNames).toContain('workout_sessions');
+      expect(tableNames).toContain('workout_exercises');
+      expect(tableNames).toContain('sets');
+      expect(tableNames).toContain('schema_version');
     });
 
     it('並行初期化後にデータベース接続の状態が正常であること', async () => {
@@ -309,7 +318,7 @@ describe('Database Initialization Concurrency Safety', () => {
       // 基本的なクエリが実行できることを確認
       const queryResult = await connection.query('SELECT 1');
       expect(queryResult).toBeDefined();
-      expect(queryResult.values).toEqual([]);
+      expect(queryResult.values).toEqual([{ '1': 1 }]);
 
       // 基本的な実行コマンドが動作することを確認
       const runResult = await connection.run('SELECT 1', []);
@@ -341,7 +350,7 @@ describe('Database Initialization Concurrency Safety', () => {
       // すべての接続が正常に動作することを確認
       const connection = await DatabaseManager.getConnection();
       const result = await connection.query('SELECT 1 as perf_test');
-      expect(result.values).toEqual([]);
+      expect(result.values).toEqual([{ perf_test: 1 }]);
     });
 
     it('メモリリークが発生しないこと（基本チェック）', async () => {
