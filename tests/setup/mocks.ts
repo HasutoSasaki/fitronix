@@ -75,7 +75,7 @@ const createMockConnection = () => ({
       return { values: results };
     } catch (error) {
       console.error('SQL query error:', error);
-      return { values: [] };
+      throw error;
     }
   }),
   run: vi.fn().mockImplementation(async (sql: string, values?: any[]) => {

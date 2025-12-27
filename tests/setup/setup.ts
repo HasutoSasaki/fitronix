@@ -29,7 +29,7 @@ beforeEach(async () => {
   try {
     await DatabaseManager.recreateTables();
   } catch (error) {
-    // Ignore errors if database is not initialized yet
+    // Log errors for debugging (database might not be initialized yet)
     console.error(error);
   }
 });
