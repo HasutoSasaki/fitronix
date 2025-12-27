@@ -30,6 +30,11 @@ function toSQLiteRow(value: unknown): SQLiteRow {
  */
 function getStringValue(row: SQLiteRow, key: string): string {
   const value = row[key];
+  if (value === null || value === undefined) {
+    throw new Error(
+      `Expected string value for key "${key}", got ${String(value)}`
+    );
+  }
   return String(value);
 }
 
