@@ -58,7 +58,7 @@
 #### 2.1 Expoプロジェクト初期化
 
 ```bash
-npx create-expo-app --template
+npx create-expo-app fitronix --template
 ```
 
 #### 2.2 依存関係の移行
