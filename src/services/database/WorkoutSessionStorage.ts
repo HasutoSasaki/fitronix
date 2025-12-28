@@ -22,6 +22,9 @@ import type { SQLiteRow } from './types';
  * Helper function to safely convert unknown to SQLiteRow
  */
 function toSQLiteRow(value: unknown): SQLiteRow {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error(`Expected object, got ${typeof value}`);
+  }
   return value as SQLiteRow;
 }
 
@@ -79,6 +82,9 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     }
 
     // For each session, fetch exercises and sets
+    // NOTE: This creates an N+1 query pattern. For future optimization,
+    // consider using JOIN queries to fetch all data in a single query
+    // and group the results on the application side.
     const sessions: WorkoutSession[] = [];
     for (const rawRow of sessionsResult.values) {
       const sessionRow = toSQLiteRow(rawRow);

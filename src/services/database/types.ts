@@ -5,7 +5,7 @@
 export type SQLiteRow = Record<string, string | number | null>;
 
 export interface SQLiteQueryResult {
-  values?: unknown[];
+  values?: SQLiteRow[];
 }
 
 export interface SQLiteRunResult {
