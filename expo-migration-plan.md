@@ -71,6 +71,20 @@ npx create-expo-app fitronix --template
 
 #### 2.3 開発環境設定
 
+```bash
+npx create-expo-app --template
+```
+
+#### 2.2 依存関係の移行
+
+| Capacitor                        | Expo 代替            | 移行作業          |
+| -------------------------------- | -------------------- | ----------------- |
+| `@capacitor-community/sqlite`    | `expo-sqlite`        | SQL文の互換性確認 |
+| `@capacitor/preferences`         | `expo-secure-store`  | API変更対応       |
+| `@capacitor/local-notifications` | `expo-notifications` | 通知設定の再実装  |
+
+#### 2.3 開発環境設定
+
 - [ ] TypeScript 5.7 設定の移行
 - [ ] ESLint/Prettier設定の適用
 - [ ] Zustand状態管理の統合

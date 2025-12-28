@@ -167,8 +167,10 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
       throw new Error(`Session not found: ${id}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const currentSession = sessions[index]!;
+    const currentSession = sessions[index];
+    if (!currentSession) {
+      throw new Error(`Session not found: ${id}`);
+    }
 
     const updatedSession: WorkoutSession = {
       ...currentSession,
@@ -279,8 +281,10 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       throw new Error(`Exercise not found: ${id}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const currentExercise = exercises[index]!;
+    const currentExercise = exercises[index];
+    if (!currentExercise) {
+      throw new Error(`Exercise not found: ${id}`);
+    }
 
     const updatedExercise: Exercise = {
       ...currentExercise,
