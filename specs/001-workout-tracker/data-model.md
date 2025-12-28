@@ -49,18 +49,23 @@ Represents a single training session (one day's workout).
 | `updatedAt` | string (ISO 8601) | Yes | Last update timestamp | ISO timestamp |
 
 **Relationships**:
+
 - Has many `WorkoutExercise` (1:N)
 
 **Indexes** (for search/filter):
+
 - `date` (descending) - for history list sorted by most recent
 
 **Example**:
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "date": "2025-11-29T10:30:00.000Z",
   "exercises": [
-    { /* WorkoutExercise object */ }
+    {
+      /* WorkoutExercise object */
+    }
   ],
   "totalTime": 3600,
   "createdAt": "2025-11-29T10:30:00.000Z",
@@ -69,6 +74,7 @@ Represents a single training session (one day's workout).
 ```
 
 **State Transitions**:
+
 1. **Draft** → User starts session, adds exercises
 2. **In Progress** → User is actively recording sets
 3. **Completed** → User saves session
@@ -92,14 +98,17 @@ Instance of an exercise within a specific workout session.
 | `order` | number | Yes | Order in session | >= 0 |
 
 **Relationships**:
+
 - Belongs to one `WorkoutSession` (N:1)
 - Has many `Set` (1:N)
 - Optionally references one `Exercise` (N:1)
 
 **Derivations**:
+
 - `maxWeight`: `Math.max(...sets.map(s => s.weight))`
 
 **Example**:
+
 ```json
 {
   "id": "660e8400-e29b-41d4-a716-446655440001",
@@ -108,7 +117,9 @@ Instance of an exercise within a specific workout session.
   "exerciseName": "ベンチプレス",
   "bodyPart": "胸",
   "sets": [
-    { /* Set object */ }
+    {
+      /* Set object */
+    }
   ],
   "maxWeight": 80,
   "order": 0
@@ -132,13 +143,16 @@ One set of an exercise (weight × reps).
 | `order` | number | Yes | Order within exercise | >= 0 |
 
 **Relationships**:
+
 - Belongs to one `WorkoutExercise` (N:1)
 
 **Validation Rules**:
+
 - `weight`: Must be >= 0, allows decimals (e.g., 22.5, 80.0)
 - `reps`: Must be >= 1, integer only (no decimals)
 
 **Example**:
+
 ```json
 {
   "id": "880e8400-e29b-41d4-a716-446655440003",
@@ -167,17 +181,21 @@ Reusable exercise definition in user's library.
 | `lastUsed` | string (ISO 8601) | No | Last time used in workout | ISO timestamp |
 
 **Relationships**:
+
 - Referenced by `WorkoutExercise` (1:N)
 
 **Indexes**:
+
 - `bodyPart` - for filtering library by body part
 - `lastUsed` (descending) - for showing recently used exercises
 
 **Validation Rules**:
-- `name`: 1-100 characters. Duplicates within same `bodyPart` are allowed but UI should warn user
+
+- `name`: 1-100 characters, must be unique per `bodyPart` (enforced by database UNIQUE constraint)
 - `videoUrl`: Must be valid URL format (http/https) or empty
 
 **Example**:
+
 ```json
 {
   "id": "770e8400-e29b-41d4-a716-446655440002",
@@ -196,6 +214,7 @@ Reusable exercise definition in user's library.
 Predefined body parts for categorization.
 
 **Values**:
+
 - `胸` (Chest)
 - `背中` (Back)
 - `脚` (Legs)
@@ -220,6 +239,7 @@ Predefined timer durations for rest between sets.
 | `name` | string | Yes | Display name | Japanese label |
 
 **Predefined Presets**:
+
 ```json
 [
   { "id": "short", "duration": 60, "name": "短い休憩 (60秒)" },
@@ -247,6 +267,7 @@ Timer state (not persisted to storage, only in Zustand).
 | `presetId` | string | No | Selected preset |
 
 **State Transitions**:
+
 1. **Idle** → User taps "Start Timer"
 2. **Running** → Timer counts down
 3. **Paused** → User taps pause (from lock screen or app)
@@ -260,33 +281,37 @@ Timer state (not persisted to storage, only in Zustand).
 
 ### Preferences API Keys
 
-| Key | Value Type | Description |
-|-----|------------|-------------|
-| `workoutSessions` | JSON array | All workout sessions |
-| `exerciseLibrary` | JSON array | User's exercise library |
-| `appSettings` | JSON object | App settings (future) |
+| Key               | Value Type  | Description             |
+| ----------------- | ----------- | ----------------------- |
+| `workoutSessions` | JSON array  | All workout sessions    |
+| `exerciseLibrary` | JSON array  | User's exercise library |
+| `appSettings`     | JSON object | App settings (future)   |
 
 ### Data Lifecycle
 
 **Create Workflow** (Workout Session):
+
 1. User starts new session → Generate UUID
 2. User adds exercise → Generate UUID, add to `exercises` array
 3. User adds set → Generate UUID, add to `sets` array
 4. User saves → Serialize to JSON, store in `workoutSessions` key
 
 **Read Workflow** (History):
+
 1. Read `workoutSessions` key from Preferences API
 2. Deserialize JSON array
 3. Sort by `date` descending
 4. Display in virtualized list
 
 **Update Workflow** (Edit Exercise):
+
 1. Read `exerciseLibrary` key
 2. Find exercise by ID
 3. Update fields
 4. Serialize and save back to `exerciseLibrary` key
 
 **Delete Workflow** (Remove Exercise):
+
 1. Read `exerciseLibrary` key
 2. Filter out exercise by ID
 3. Serialize and save back to `exerciseLibrary` key
@@ -295,16 +320,16 @@ Timer state (not persisted to storage, only in Zustand).
 
 ## Validation Rules Summary
 
-| Entity | Field | Rule |
-|--------|-------|------|
-| WorkoutSession | `date` | ISO 8601 timestamp |
-| WorkoutSession | `exercises` | Min 1 exercise |
-| WorkoutExercise | `exerciseName` | 1-100 chars |
-| WorkoutExercise | `bodyPart` | Valid enum value |
-| Set | `weight` | >= 0, allows decimals |
-| Set | `reps` | >= 1, integer only |
-| Exercise | `name` | 1-100 chars, unique per bodyPart |
-| Exercise | `videoUrl` | Valid URL or empty |
+| Entity          | Field          | Rule                                                   |
+| --------------- | -------------- | ------------------------------------------------------ |
+| WorkoutSession  | `date`         | ISO 8601 timestamp                                     |
+| WorkoutSession  | `exercises`    | Min 1 exercise                                         |
+| WorkoutExercise | `exerciseName` | 1-100 chars                                            |
+| WorkoutExercise | `bodyPart`     | Valid enum value                                       |
+| Set             | `weight`       | >= 0, allows decimals                                  |
+| Set             | `reps`         | >= 1, integer only                                     |
+| Exercise        | `name`         | 1-100 chars, unique per `bodyPart` (UNIQUE constraint) |
+| Exercise        | `videoUrl`     | Valid URL or empty                                     |
 
 ---
 
@@ -313,6 +338,7 @@ Timer state (not persisted to storage, only in Zustand).
 ### V1 → V2 (Add Cloud Sync)
 
 If cloud sync is added later:
+
 - Add `syncedAt` timestamp to all entities
 - Add `deletedAt` for soft deletes
 - Add `userId` foreign key
@@ -324,12 +350,12 @@ If cloud sync is added later:
 
 ### Data Volume Estimates
 
-| Entity | Est. Count | Storage Size |
-|--------|------------|--------------|
-| WorkoutSession | 100-500 | ~50KB per session (with sets) |
-| Exercise | 10-50 | ~1KB per exercise |
-| Set | 1,000-5,000 | ~100B per set |
-| **Total** | | **5-25MB** |
+| Entity         | Est. Count  | Storage Size                  |
+| -------------- | ----------- | ----------------------------- |
+| WorkoutSession | 100-500     | ~50KB per session (with sets) |
+| Exercise       | 10-50       | ~1KB per exercise             |
+| Set            | 1,000-5,000 | ~100B per set                 |
+| **Total**      |             | **5-25MB**                    |
 
 ### Optimization Strategies
 

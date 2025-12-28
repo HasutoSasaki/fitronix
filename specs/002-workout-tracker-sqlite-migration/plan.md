@@ -8,6 +8,7 @@
 ## Summary
 
 Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) to @capacitor-community/sqlite (relational database) to enable:
+
 - Relational data modeling with foreign key constraints
 - Efficient querying with indexes for date ranges, exercise names, and body parts
 - Schema versioning for future migrations
@@ -20,6 +21,7 @@ Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) 
 **Language/Version**: TypeScript 5.7, JavaScript ES2020+
 
 **Primary Dependencies**:
+
 - @capacitor-community/sqlite ^7.0.2 (SQLite database)
 - @capacitor/core ^7.4.0 (Capacitor runtime)
 - React 19 (UI framework)
@@ -27,11 +29,13 @@ Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) 
 - Vitest 3 (testing framework)
 
 **Storage**: SQLite database via @capacitor-community/sqlite
+
 - Database file: `fitronix_workout_tracker.db` (persistent storage)
 - In-memory database: `:memory:` (testing only)
 - Schema version: 1 (tracked in `schema_version` table)
 
 **Testing**:
+
 - Unit tests: Vitest 3 + @testing-library/react 16
 - Contract tests: Vitest with custom test fixtures
 - Test database: In-memory SQLite (`:memory:`)
@@ -41,18 +45,21 @@ Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) 
 **Project Type**: Mobile (React + Capacitor hybrid app)
 
 **Performance Goals**:
+
 - Database initialization: < 1 second (first launch)
 - Query response time: < 2 seconds for 100+ sessions
 - Exercise name search: < 1 second for 50+ records
 - Data export/import: < 5 seconds for 1000 records
 
 **Constraints**:
+
 - Must support offline-first architecture (no network required)
 - Backward compatibility: No data migration from Preferences (clean installation)
 - Maximum database size: < 100 MB for typical use (1000 sessions, 10000 sets)
 - Must work on both iOS and Android without platform-specific code
 
 **Scale/Scope**:
+
 - Expected data volume: 1000 workout sessions, 5000 exercises, 10000 sets
 - Concurrent users: 1 (single-user mobile app)
 - Schema tables: 4 main tables + 1 version table
@@ -60,7 +67,7 @@ Migrate Fitronix Workout Tracker from Capacitor Preferences (key-value storage) 
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### ✅ Code Quality (NON-NEGOTIABLE)
 
@@ -147,6 +154,7 @@ tests/
 ```
 
 **Structure Decision**:
+
 - **Single project** structure (mobile app with unified codebase)
 - Database logic isolated in `src/services/database/`
 - Contract tests verify interface compliance before implementation
@@ -157,5 +165,5 @@ tests/
 > **No Constitution violations** - This section is empty as all principles are satisfied.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| N/A       | N/A        | N/A                                 |
+| --------- | ---------- | ------------------------------------ |
+| N/A       | N/A        | N/A                                  |

@@ -30,8 +30,9 @@ TypeScript 5.7, JavaScript ES2020+: Follow standard conventions
 - 詳細な結果やテスト結果は不要
 
 例:
+
 ```
-fix(storage): contract testの失敗を修正
+fix(storage): API仕様テストの失敗を修正
 
 - updateSessionでcreatedAtが上書きされる問題を修正
 - テスト間でデータが残る問題を修正

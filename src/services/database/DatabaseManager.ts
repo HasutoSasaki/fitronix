@@ -3,7 +3,11 @@
  * Handles initialization, schema creation, and connection management
  */
 
-import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection } from '@capacitor-community/sqlite';
+import {
+  CapacitorSQLite,
+  SQLiteDBConnection,
+  SQLiteConnection,
+} from '@capacitor-community/sqlite';
 import {
   CREATE_TABLES_SQL,
   CREATE_INDEXES_SQL,
@@ -12,7 +16,7 @@ import {
 } from './schema';
 
 class DatabaseManager {
-  private static instance: DatabaseManager;
+  private static instance: DatabaseManager | undefined;
   private db: SQLiteDBConnection | null = null;
   private dbName = 'fitronix_workout_tracker';
   private isInitialized = false;
@@ -25,10 +29,7 @@ class DatabaseManager {
   }
 
   public static getInstance(): DatabaseManager {
-    if (!DatabaseManager.instance) {
-      DatabaseManager.instance = new DatabaseManager();
-    }
-    return DatabaseManager.instance;
+    return (DatabaseManager.instance ??= new DatabaseManager());
   }
 
   /**
@@ -55,8 +56,8 @@ class DatabaseManager {
         false
       );
 
-      // Open database
-      await this.db?.open();
+      // Open the database connection
+      await this.db.open();
 
       // Create tables and indexes
       await this.createTables();
@@ -138,7 +139,8 @@ class DatabaseManager {
    */
   public async clearAllData(): Promise<void> {
     if (!this.db) {
-      throw new Error('Database not initialized');
+      // Skip if database is not initialized (e.g., after close())
+      return;
     }
 
     await this.db.execute(`
@@ -147,6 +149,33 @@ class DatabaseManager {
       DELETE FROM workout_sessions;
       DELETE FROM exercises;
     `);
+  }
+
+  /**
+   * Recreate all tables with current schema (for testing)
+   * Use this when schema changes and you need to apply new constraints
+   */
+  public async recreateTables(): Promise<void> {
+    // Ensure database is initialized
+    await this.getConnection();
+
+    if (!this.db) {
+      throw new Error('Failed to initialize database');
+    }
+
+    // Drop all tables
+    await this.db.execute(`
+      DROP TABLE IF EXISTS sets;
+      DROP TABLE IF EXISTS workout_exercises;
+      DROP TABLE IF EXISTS workout_sessions;
+      DROP TABLE IF EXISTS exercises;
+      DROP TABLE IF EXISTS schema_version;
+    `);
+
+    // Recreate tables with current schema
+    await this.db.execute(CREATE_TABLES_SQL);
+    await this.db.execute(CREATE_INDEXES_SQL);
+    await this.db.run(INSERT_SCHEMA_VERSION_SQL, [SCHEMA_VERSION]);
   }
 
   /**
@@ -196,7 +225,9 @@ class DatabaseManager {
 
       try {
         // Import data using CapacitorSQLite API
-        await CapacitorSQLite.importFromJson({ jsonstring: jsonString });
+        await CapacitorSQLite.importFromJson({
+          jsonstring: jsonString,
+        });
 
         // Commit transaction on success
         await this.db.commitTransaction();
@@ -209,7 +240,8 @@ class DatabaseManager {
       if (error instanceof SyntaxError) {
         throw new Error(`Invalid JSON format: ${error.message}`);
       }
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to import database: ${errorMessage}`);
     }
   }

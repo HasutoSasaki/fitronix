@@ -62,7 +62,10 @@ npx cap open android
 ### ストレージAPI
 
 ```typescript
-import { WorkoutSessionStorage, ExerciseLibraryStorage } from './services/database/storage';
+import {
+  WorkoutSessionStorage,
+  ExerciseLibraryStorage,
+} from './services/database/storage';
 
 // ワークアウトセッション管理
 const sessionStorage = new WorkoutSessionStorage();

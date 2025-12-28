@@ -21,7 +21,9 @@ describe('Contract: Data Export and Import (US4)', () => {
 
     // Clear all sessions before each test
     const allSessions = await sessionStorage.getAllSessions();
-    await Promise.all(allSessions.map((s) => sessionStorage.deleteSession(s.id)));
+    await Promise.all(
+      allSessions.map((s) => sessionStorage.deleteSession(s.id))
+    );
   });
 
   describe('US4-AC3: Invalid JSON Format Handling', () => {
@@ -54,7 +56,9 @@ describe('Contract: Data Export and Import (US4)', () => {
       // Since we cannot easily create data in mock environment, we test the error handling itself
       const invalidJson = 'invalid json data';
 
-      await expect(db.importFromJson(invalidJson)).rejects.toThrow('Invalid JSON format');
+      await expect(db.importFromJson(invalidJson)).rejects.toThrow(
+        'Invalid JSON format'
+      );
     });
   });
 
@@ -94,7 +98,9 @@ describe('Contract: Data Export and Import (US4)', () => {
       const invalidJson = '{"invalid": "data"';
 
       // Should throw error due to invalid JSON
-      await expect(db.importFromJson(invalidJson)).rejects.toThrow('Invalid JSON format');
+      await expect(db.importFromJson(invalidJson)).rejects.toThrow(
+        'Invalid JSON format'
+      );
 
       // Transaction rollback ensures no partial data corruption
       // (In mock environment, we verify the error handling; in real environment, data would be protected)

@@ -5,7 +5,7 @@
 **Status**: Implemented
 **Input**: Migrate from Capacitor Preferences (key-value storage) to @capacitor-community/sqlite (relational database) for improved data modeling, query performance, and scalability
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Data Persistence with Relational Integrity (Priority: P1)
 
@@ -82,7 +82,7 @@
 - **JSON エクスポートサイズ制限**: 大量のデータ(1000件以上のセッション)をエクスポートする際、JSONサイズが大きくなりすぎる場合、分割エクスポートまたは圧縮を推奨
 - **インデックスの効果測定**: 実際のクエリパフォーマンスを測定し、インデックスが正しく使用されているか `EXPLAIN QUERY PLAN` で検証
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -135,7 +135,7 @@
 - **Exercise**: トレーニングライブラリの種目定義。属性: id (UUID), name, bodyPart, videoUrl (オプション), createdAt, lastUsed
 - **SchemaVersion**: スキーマバージョン管理。属性: version (整数、主キー), appliedAt (適用日時)
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

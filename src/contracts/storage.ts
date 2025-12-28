@@ -11,11 +11,7 @@
  * - Type-safe: Leverage TypeScript for compile-time safety
  */
 
-import type {
-  WorkoutSession,
-  Exercise,
-  BodyPart,
-} from '../types/models';
+import type { WorkoutSession, Exercise, BodyPart } from '../types/models';
 
 /**
  * Workout Session Storage Contract
@@ -195,6 +191,23 @@ export interface IExerciseLibraryStorage {
   getExercisesByBodyPart(bodyPart: BodyPart): Promise<Exercise[]>;
 
   /**
+   * Search exercises by name (partial match, case-insensitive)
+   *
+   * **Implementation Requirement**: Implementations MUST perform case-insensitive
+   * comparison for ASCII/English characters (e.g., "Bench" matches "bench").
+   * For SQLite implementations, use `COLLATE NOCASE` in queries. Note that Japanese
+   * and other non-ASCII scripts are compared as-is (they have no case concept).
+   *
+   * @param query - Search query string
+   * @returns Exercises matching the query, sorted by lastUsed descending
+   *
+   * @example
+   * const results = await storage.searchExercises('ベンチ');
+   * // Returns: [{ name: 'ベンチプレス', ... }, { name: 'インクラインベンチプレス', ... }]
+   */
+  searchExercises(query: string): Promise<Exercise[]>;
+
+  /**
    * Create a new exercise in library
    *
    * Auto-generates UUID and sets createdAt timestamp.
@@ -250,8 +263,27 @@ export interface IExerciseLibraryStorage {
    */
   deleteExercise(id: string): Promise<void>;
 
+  /**
+   * Mark an exercise as used by updating its lastUsed timestamp
+   *
+   * Searches for exercise by name (case-insensitive) and updates lastUsed to current time.
+   * If multiple exercises have the same name, only the first match (ordered by createdAt ascending) is updated.
+   * Does nothing if no exercise with the name is found (idempotent).
+   *
+   * **Implementation Requirement**: Implementations MUST perform case-insensitive
+   * comparison for ASCII/English characters (e.g., "Bench Press" matches "bench press").
+   * For SQLite implementations, use `COLLATE NOCASE` in queries. Note that Japanese
+   * and other non-ASCII scripts are compared as-is (they have no case concept).
+   *
+   * @param exerciseName - Exercise name (case-insensitive)
+   * @returns Promise<void>
+   *
+   * @example
+   * await storage.markExerciseAsUsed('ベンチプレス');
+   * // Updates lastUsed timestamp for 'ベンチプレス' exercise
+   */
+  markExerciseAsUsed(exerciseName: string): Promise<void>;
 }
-
 
 /**
  * Type Guards
@@ -275,7 +307,10 @@ export function isISO8601(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   const iso8601Regex =
     /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2}))?$/;
-  return iso8601Regex.test(value);
+  if (!iso8601Regex.test(value)) return false;
+  // Validate date validity (e.g., reject 2025-13-45)
+  const date = new Date(value);
+  return !isNaN(date.getTime());
 }
 
 /**

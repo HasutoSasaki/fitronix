@@ -3,13 +3,38 @@
  * Manages user's exercise library in SQLite database
  */
 
-import type { IExerciseLibraryStorage } from '../../../specs/002-workout-tracker-sqlite-migration/contracts/storage';
-import type {
-  Exercise,
-  BodyPart,
-} from '../../types/models';
+import type { IExerciseLibraryStorage } from '../../contracts/storage';
+import type { Exercise, BodyPart } from '../../types/models';
 import { generateUUID, getCurrentTimestamp } from '../../utils/storage';
 import DatabaseManager from './DatabaseManager';
+import type { SQLiteRow } from './types';
+
+/**
+ * Helper function to safely convert unknown to SQLiteRow
+ */
+function toSQLiteRow(value: unknown): SQLiteRow {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('Invalid SQLiteRow: expected object');
+  }
+  return value as SQLiteRow;
+}
+
+/**
+ * Helper function to safely convert SQLiteRow to Exercise
+ */
+function rowToExercise(row: SQLiteRow): Exercise {
+  const videoUrl = row.videoUrl;
+  const lastUsed = row.lastUsed;
+
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    bodyPart: String(row.bodyPart) as BodyPart,
+    ...(videoUrl !== null && { videoUrl: String(videoUrl) }),
+    createdAt: String(row.createdAt),
+    ...(lastUsed !== null && { lastUsed: String(lastUsed) }),
+  };
+}
 
 export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   private async getDb() {
@@ -41,14 +66,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   /**
@@ -60,24 +78,17 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   async getExerciseById(id: string): Promise<Exercise | null> {
     const db = await this.getDb();
 
-    const result = await db.query(
-      'SELECT * FROM exercises WHERE id = ?',
-      [id]
-    );
+    const result = await db.query('SELECT * FROM exercises WHERE id = ?', [id]);
 
     if (!result.values || result.values.length === 0) {
       return null;
     }
 
-    const row = result.values[0];
-    return {
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    };
+    const firstRow: unknown = result.values[0];
+    if (firstRow === undefined) {
+      return null;
+    }
+    return rowToExercise(toSQLiteRow(firstRow));
   }
 
   /**
@@ -100,14 +111,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   async searchExercises(query: string): Promise<Exercise[]> {
@@ -115,12 +119,12 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     // Escape SQL wildcards to prevent unintended pattern matching
     const escapedQuery = query
-      .replace(/\\/g, '\\\\')  // Escape backslash first
-      .replace(/%/g, '\\%')    // Escape percent
-      .replace(/_/g, '\\_');   // Escape underscore
+      .replace(/\\/g, '\\\\') // Escape backslash first
+      .replace(/%/g, '\\%') // Escape percent
+      .replace(/_/g, '\\_'); // Escape underscore
 
     const result = await db.query(
-      'SELECT * FROM exercises WHERE name LIKE ? ESCAPE \'\\\' COLLATE NOCASE ORDER BY lastUsed DESC',
+      "SELECT * FROM exercises WHERE name LIKE ? ESCAPE '\\' COLLATE NOCASE ORDER BY lastUsed DESC",
       [`%${escapedQuery}%`]
     );
 
@@ -128,14 +132,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
       return [];
     }
 
-    return result.values.map(row => ({
-      id: row.id,
-      name: row.name,
-      bodyPart: row.bodyPart,
-      videoUrl: row.videoUrl ?? undefined,
-      createdAt: row.createdAt,
-      lastUsed: row.lastUsed ?? undefined,
-    }));
+    return result.values.map((rawRow) => rowToExercise(toSQLiteRow(rawRow)));
   }
 
   /**
@@ -163,11 +160,23 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     const id = generateUUID();
     const createdAt = getCurrentTimestamp();
 
-    await db.run(
-      `INSERT INTO exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, data.name, data.bodyPart, data.videoUrl ?? null, createdAt, null]
-    );
+    try {
+      await db.run(
+        `INSERT INTO exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, data.name, data.bodyPart, data.videoUrl ?? null, createdAt, null]
+      );
+    } catch (error) {
+      // Check for UNIQUE constraint violation
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('UNIQUE constraint failed')) {
+        throw new Error(
+          `Exercise "${data.name}" already exists in body part "${data.bodyPart}"`
+        );
+      }
+      throw error;
+    }
 
     const created = await this.getExerciseById(id);
     if (!created) {
@@ -201,7 +210,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     // Build update query dynamically
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | null)[] = [];
 
     if (data.name !== undefined) {
       updates.push('name = ?');
@@ -222,10 +231,24 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     if (updates.length > 0) {
       values.push(id);
-      await db.run(
-        `UPDATE exercises SET ${updates.join(', ')} WHERE id = ?`,
-        values
-      );
+      try {
+        await db.run(
+          `UPDATE exercises SET ${updates.join(', ')} WHERE id = ?`,
+          values
+        );
+      } catch (error) {
+        // Check for UNIQUE constraint violation
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('UNIQUE constraint failed')) {
+          const newName = data.name ?? existing.name;
+          const newBodyPart = data.bodyPart ?? existing.bodyPart;
+          throw new Error(
+            `Exercise "${newName}" already exists in body part "${newBodyPart}"`
+          );
+        }
+        throw error;
+      }
     }
 
     const updated = await this.getExerciseById(id);
@@ -268,9 +291,48 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
   async updateLastUsed(id: string, timestamp: string): Promise<void> {
     const db = await this.getDb();
 
-    await db.run(
-      'UPDATE exercises SET lastUsed = ? WHERE id = ?',
-      [timestamp, id]
+    await db.run('UPDATE exercises SET lastUsed = ? WHERE id = ?', [
+      timestamp,
+      id,
+    ]);
+  }
+
+  /**
+   * Mark an exercise as used by updating its lastUsed timestamp
+   *
+   * Searches for exercise by name (case-insensitive) and updates lastUsed to current time.
+   * If multiple exercises have the same name, only the first match is updated.
+   * Does nothing if no exercise with the name is found (idempotent).
+   *
+   * @param exerciseName - Exercise name (case-insensitive)
+   * @returns Promise<void>
+   *
+   * @example
+   * await storage.markExerciseAsUsed('ベンチプレス');
+   * // Updates lastUsed timestamp for 'ベンチプレス' exercise
+   */
+  async markExerciseAsUsed(exerciseName: string): Promise<void> {
+    const db = await this.getDb();
+    const now = getCurrentTimestamp();
+
+    // Find first matching exercise by name (case-insensitive)
+    const result = await db.query(
+      'SELECT id FROM exercises WHERE name = ? COLLATE NOCASE LIMIT 1',
+      [exerciseName]
     );
+
+    if (!result.values || result.values.length === 0) {
+      // No matching exercise found - idempotent, do nothing
+      return;
+    }
+
+    const firstRow = toSQLiteRow(result.values[0]);
+    const exerciseId = String(firstRow.id);
+
+    // Update lastUsed timestamp
+    await db.run('UPDATE exercises SET lastUsed = ? WHERE id = ?', [
+      now,
+      exerciseId,
+    ]);
   }
 }

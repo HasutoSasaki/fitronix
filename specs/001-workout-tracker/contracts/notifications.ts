@@ -5,7 +5,11 @@
  * Handles lock screen timer notifications with action buttons.
  */
 
-import type { LocalNotificationSchema, LocalNotificationDescriptor, ActionPerformed } from '@capacitor/local-notifications';
+import type {
+  LocalNotificationSchema,
+  LocalNotificationDescriptor,
+  ActionPerformed,
+} from '@capacitor/local-notifications';
 
 /**
  * Timer notification manager interface
@@ -38,7 +42,10 @@ export interface ITimerNotificationManager {
    * @param updates - Updated notification data
    * @returns Promise<void>
    */
-  updateTimerNotification(id: number, updates: Partial<TimerNotificationConfig>): Promise<void>;
+  updateTimerNotification(
+    id: number,
+    updates: Partial<TimerNotificationConfig>
+  ): Promise<void>;
 
   /**
    * Cancel a scheduled or ongoing notification
@@ -53,7 +60,9 @@ export interface ITimerNotificationManager {
    * @param config - Rest complete notification configuration
    * @returns Promise<number> - Notification ID
    */
-  scheduleRestCompleteNotification(config: RestCompleteNotificationConfig): Promise<number>;
+  scheduleRestCompleteNotification(
+    config: RestCompleteNotificationConfig
+  ): Promise<number>;
 
   /**
    * Listen to notification action performed events
@@ -61,7 +70,9 @@ export interface ITimerNotificationManager {
    * @param callback - Callback function receiving action data
    * @returns Promise<void>
    */
-  addActionListener(callback: (action: TimerActionPerformed) => void): Promise<void>;
+  addActionListener(
+    callback: (action: TimerActionPerformed) => void
+  ): Promise<void>;
 
   /**
    * Remove action listener
@@ -197,7 +208,10 @@ export type NotificationPermissionStatus = 'granted' | 'denied' | 'prompt';
  * Error types for notification operations
  */
 export class NotificationError extends Error {
-  constructor(message: string, public code: NotificationErrorCode) {
+  constructor(
+    message: string,
+    public code: NotificationErrorCode
+  ) {
     super(message);
     this.name = 'NotificationError';
   }

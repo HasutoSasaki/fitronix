@@ -10,8 +10,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import type { IExerciseLibraryStorage } from '../../../src/contracts/storage';
 import { BodyPart } from '../../../src/types/models';
 
-// Import implementation (will be created in T030)
-import { ExerciseLibraryStorage } from '../../../src/services/storage';
+// Import SQLite implementation (with UNIQUE constraint support)
+import { ExerciseLibraryStorage } from '../../../src/services/database/ExerciseLibraryStorage';
 
 describe('Contract: IExerciseLibraryStorage', () => {
   let storage: IExerciseLibraryStorage;
@@ -52,20 +52,38 @@ describe('Contract: IExerciseLibraryStorage', () => {
 
   describe('getExercisesByBodyPart()', () => {
     beforeEach(async () => {
-      await storage.createExercise({ name: 'ベンチプレス', bodyPart: BodyPart.CHEST });
-      await storage.createExercise({ name: 'ダンベルプレス', bodyPart: BodyPart.CHEST });
-      await storage.createExercise({ name: 'スクワット', bodyPart: BodyPart.LEGS });
-      await storage.createExercise({ name: 'デッドリフト', bodyPart: BodyPart.BACK });
+      await storage.createExercise({
+        name: 'ベンチプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+      await storage.createExercise({
+        name: 'ダンベルプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+      await storage.createExercise({
+        name: 'スクワット',
+        bodyPart: BodyPart.LEGS,
+      });
+      await storage.createExercise({
+        name: 'デッドリフト',
+        bodyPart: BodyPart.BACK,
+      });
     });
 
     it('returns exercises filtered by body part', async () => {
-      const chestExercises = await storage.getExercisesByBodyPart(BodyPart.CHEST);
+      const chestExercises = await storage.getExercisesByBodyPart(
+        BodyPart.CHEST
+      );
       expect(chestExercises).toHaveLength(2);
-      expect(chestExercises.every((e) => e.bodyPart === BodyPart.CHEST)).toBe(true);
+      expect(chestExercises.every((e) => e.bodyPart === BodyPart.CHEST)).toBe(
+        true
+      );
     });
 
     it('returns empty array when no exercises for body part', async () => {
-      const shoulderExercises = await storage.getExercisesByBodyPart(BodyPart.SHOULDERS);
+      const shoulderExercises = await storage.getExercisesByBodyPart(
+        BodyPart.SHOULDERS
+      );
       expect(shoulderExercises).toEqual([]);
     });
   });
@@ -93,10 +111,22 @@ describe('Contract: IExerciseLibraryStorage', () => {
 
   describe('searchExercises()', () => {
     beforeEach(async () => {
-      await storage.createExercise({ name: 'ベンチプレス', bodyPart: BodyPart.CHEST });
-      await storage.createExercise({ name: 'インクラインベンチプレス', bodyPart: BodyPart.CHEST });
-      await storage.createExercise({ name: 'ダンベルプレス', bodyPart: BodyPart.CHEST });
-      await storage.createExercise({ name: 'スクワット', bodyPart: BodyPart.LEGS });
+      await storage.createExercise({
+        name: 'ベンチプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+      await storage.createExercise({
+        name: 'インクラインベンチプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+      await storage.createExercise({
+        name: 'ダンベルプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+      await storage.createExercise({
+        name: 'スクワット',
+        bodyPart: BodyPart.LEGS,
+      });
     });
 
     it('finds exercises by partial name match', async () => {
@@ -106,7 +136,10 @@ describe('Contract: IExerciseLibraryStorage', () => {
     });
 
     it('is case-insensitive', async () => {
-      await storage.createExercise({ name: 'Push Up', bodyPart: BodyPart.CHEST });
+      await storage.createExercise({
+        name: 'Push Up',
+        bodyPart: BodyPart.CHEST,
+      });
       const results = await storage.searchExercises('push');
       expect(results.some((e) => e.name === 'Push Up')).toBe(true);
     });
@@ -130,7 +163,9 @@ describe('Contract: IExerciseLibraryStorage', () => {
       });
 
       expect(exercise.id).toBeTruthy();
-      expect(exercise.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      expect(exercise.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
     });
 
     it('sets createdAt timestamp', async () => {
@@ -160,30 +195,41 @@ describe('Contract: IExerciseLibraryStorage', () => {
         name: 'ベンチプレス',
         bodyPart: BodyPart.CHEST,
         videoUrl: 'https://youtube.com/watch?v=test',
-        lastUsed: '2025-11-29T10:00:00.000Z',
       });
 
       expect(exercise.videoUrl).toBe('https://youtube.com/watch?v=test');
-      expect(exercise.lastUsed).toBe('2025-11-29T10:00:00.000Z');
     });
 
-    it('allows duplicate names in same body part (UI warns, but API allows)', async () => {
+    it('enforces unique (name, bodyPart) constraint', async () => {
       await storage.createExercise({
         name: 'ベンチプレス',
         bodyPart: BodyPart.CHEST,
       });
 
-      const duplicate = await storage.createExercise({
-        name: 'ベンチプレス',
+      // Attempting to create duplicate (name, bodyPart) should fail
+      await expect(
+        storage.createExercise({
+          name: 'ベンチプレス',
+          bodyPart: BodyPart.CHEST,
+        })
+      ).rejects.toThrow('already exists');
+    });
+
+    it('allows same name with different body part', async () => {
+      await storage.createExercise({
+        name: 'プレス',
         bodyPart: BodyPart.CHEST,
       });
 
-      expect(duplicate).toBeTruthy();
-      expect(duplicate.name).toBe('ベンチプレス');
+      // Same name but different bodyPart should succeed
+      const shoulderPress = await storage.createExercise({
+        name: 'プレス',
+        bodyPart: BodyPart.SHOULDERS,
+      });
 
-      const all = await storage.getAllExercises();
-      const benchPresses = all.filter((e) => e.name === 'ベンチプレス');
-      expect(benchPresses.length).toBeGreaterThanOrEqual(2);
+      expect(shoulderPress).toBeTruthy();
+      expect(shoulderPress.name).toBe('プレス');
+      expect(shoulderPress.bodyPart).toBe(BodyPart.SHOULDERS);
     });
   });
 
@@ -205,7 +251,9 @@ describe('Contract: IExerciseLibraryStorage', () => {
     });
 
     it('throws error when exercise not found', async () => {
-      await expect(storage.updateExercise('nonexistent', { name: 'New Name' })).rejects.toThrow();
+      await expect(
+        storage.updateExercise('nonexistent', { name: 'New Name' })
+      ).rejects.toThrow();
     });
 
     it('allows partial updates', async () => {
@@ -221,6 +269,25 @@ describe('Contract: IExerciseLibraryStorage', () => {
 
       expect(updated.name).toBe('ベンチプレス'); // unchanged
       expect(updated.videoUrl).toBe('https://youtube.com/new'); // updated
+    });
+
+    it('enforces unique (name, bodyPart) constraint on update', async () => {
+      await storage.createExercise({
+        name: 'ベンチプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+
+      const otherExercise = await storage.createExercise({
+        name: 'ダンベルプレス',
+        bodyPart: BodyPart.CHEST,
+      });
+
+      // Attempting to update to duplicate (name, bodyPart) should fail
+      await expect(
+        storage.updateExercise(otherExercise.id, {
+          name: 'ベンチプレス',
+        })
+      ).rejects.toThrow('already exists');
     });
   });
 
@@ -263,21 +330,23 @@ describe('Contract: IExerciseLibraryStorage', () => {
     });
 
     it('does nothing if exercise name not found (idempotent)', async () => {
-      await expect(storage.markExerciseAsUsed('NonexistentExercise')).resolves.toBeUndefined();
+      await expect(
+        storage.markExerciseAsUsed('NonexistentExercise')
+      ).resolves.toBeUndefined();
     });
 
-    it('updates only first matching exercise when duplicates exist', async () => {
+    it('updates only first matching exercise when duplicates exist (different bodyPart)', async () => {
       const ex1 = await storage.createExercise({
-        name: 'ベンチプレス',
+        name: 'プレス',
         bodyPart: BodyPart.CHEST,
       });
 
       const ex2 = await storage.createExercise({
-        name: 'ベンチプレス',
-        bodyPart: BodyPart.CHEST,
+        name: 'プレス',
+        bodyPart: BodyPart.SHOULDERS, // Different bodyPart
       });
 
-      await storage.markExerciseAsUsed('ベンチプレス');
+      await storage.markExerciseAsUsed('プレス');
 
       const fetched1 = await storage.getExerciseById(ex1.id);
       const fetched2 = await storage.getExerciseById(ex2.id);

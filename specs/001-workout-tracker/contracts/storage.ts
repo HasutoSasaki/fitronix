@@ -30,14 +30,19 @@ export interface IWorkoutSessionStorage {
    * @param endDate - ISO timestamp string
    * @returns Promise<WorkoutSession[]> - Filtered sessions
    */
-  getSessionsByDateRange(startDate: string, endDate: string): Promise<WorkoutSession[]>;
+  getSessionsByDateRange(
+    startDate: string,
+    endDate: string
+  ): Promise<WorkoutSession[]>;
 
   /**
    * Create a new workout session
    * @param session - Session data (id will be generated if not provided)
    * @returns Promise<WorkoutSession> - Created session with generated id
    */
-  createSession(session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkoutSession>;
+  createSession(
+    session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<WorkoutSession>;
 
   /**
    * Update an existing workout session
@@ -46,7 +51,10 @@ export interface IWorkoutSessionStorage {
    * @returns Promise<WorkoutSession> - Updated session
    * @throws Error if session not found
    */
-  updateSession(id: string, updates: Partial<WorkoutSession>): Promise<WorkoutSession>;
+  updateSession(
+    id: string,
+    updates: Partial<WorkoutSession>
+  ): Promise<WorkoutSession>;
 
   /**
    * Delete a workout session
@@ -102,7 +110,9 @@ export interface IExerciseLibraryStorage {
    * @returns Promise<Exercise> - Created exercise with generated id
    * @note Duplicates (same name+bodyPart) are allowed; UI should warn user before calling this
    */
-  createExercise(exercise: Omit<Exercise, 'id' | 'createdAt'>): Promise<Exercise>;
+  createExercise(
+    exercise: Omit<Exercise, 'id' | 'createdAt'>
+  ): Promise<Exercise>;
 
   /**
    * Update an existing exercise
@@ -182,7 +192,10 @@ export const STORAGE_KEYS = {
  * Storage error types
  */
 export class StorageError extends Error {
-  constructor(message: string, public code: string) {
+  constructor(
+    message: string,
+    public code: string
+  ) {
     super(message);
     this.name = 'StorageError';
   }

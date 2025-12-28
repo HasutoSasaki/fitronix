@@ -10,11 +10,12 @@ import type {
   IWorkoutSessionStorage,
   IExerciseLibraryStorage,
 } from '../contracts/storage';
-import type {
-  WorkoutSession,
-  Exercise,
-} from '../types/models';
-import { generateUUID, getCurrentTimestamp, getUpdatedTimestamp } from '../utils/storage';
+import type { WorkoutSession, Exercise } from '../types/models';
+import {
+  generateUUID,
+  getCurrentTimestamp,
+  getUpdatedTimestamp,
+} from '../utils/storage';
 
 /**
  * PreferencesStorage - Key-value storage using Capacitor Preferences
@@ -83,19 +84,21 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
   private prefsStorage = new PreferencesStorage();
 
   async getAllSessions(): Promise<WorkoutSession[]> {
-    const sessions = await this.prefsStorage.get<WorkoutSession[]>(this.STORAGE_KEY);
+    const sessions = await this.prefsStorage.get<WorkoutSession[]>(
+      this.STORAGE_KEY
+    );
     if (!sessions) {
       return [];
     }
     // Sort by date descending (most recent first)
-    return sessions.sort((a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    return sessions.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
   }
 
   async getSessionById(id: string): Promise<WorkoutSession | null> {
     const sessions = await this.getAllSessions();
-    return sessions.find(s => s.id === id) ?? null;
+    return sessions.find((s) => s.id === id) ?? null;
   }
 
   async getSessionsByDateRange(
@@ -106,7 +109,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
 
-    return sessions.filter(s => {
+    return sessions.filter((s) => {
       const sessionTime = new Date(s.date).getTime();
       return sessionTime >= start && sessionTime <= end;
     });
@@ -138,10 +141,10 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     };
 
     // Fill in parent IDs
-    newSession.exercises = newSession.exercises.map(ex => ({
+    newSession.exercises = newSession.exercises.map((ex) => ({
       ...ex,
       sessionId: newSession.id,
-      sets: ex.sets.map(set => ({
+      sets: ex.sets.map((set) => ({
         ...set,
         exerciseId: ex.id,
       })),
@@ -158,7 +161,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     updates: Partial<WorkoutSession>
   ): Promise<WorkoutSession> {
     const sessions = await this.getAllSessions();
-    const index = sessions.findIndex(s => s.id === id);
+    const index = sessions.findIndex((s) => s.id === id);
 
     if (index === -1) {
       throw new Error(`Session not found: ${id}`);
@@ -168,7 +171,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
     if (!currentSession) {
       throw new Error(`Session not found: ${id}`);
     }
-    
+
     const updatedSession: WorkoutSession = {
       ...currentSession,
       ...updates,
@@ -185,7 +188,7 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
 
   async deleteSession(id: string): Promise<void> {
     const sessions = await this.getAllSessions();
-    const filtered = sessions.filter(s => s.id !== id);
+    const filtered = sessions.filter((s) => s.id !== id);
 
     if (filtered.length === sessions.length) {
       throw new Error(`Session not found: ${id}`);
@@ -200,7 +203,9 @@ export class WorkoutSessionStorage implements IWorkoutSessionStorage {
 
     for (const session of sessions) {
       for (const exercise of session.exercises) {
-        if (exercise.exerciseName.toLowerCase() === exerciseName.toLowerCase()) {
+        if (
+          exercise.exerciseName.toLowerCase() === exerciseName.toLowerCase()
+        ) {
           for (const set of exercise.sets) {
             if (maxWeight === null || set.weight > maxWeight) {
               maxWeight = set.weight;
@@ -229,12 +234,12 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
   async getExercisesByBodyPart(bodyPart: string): Promise<Exercise[]> {
     const exercises = await this.getAllExercises();
-    return exercises.filter(e => e.bodyPart === bodyPart);
+    return exercises.filter((e) => e.bodyPart === bodyPart);
   }
 
   async getExerciseById(id: string): Promise<Exercise | null> {
     const exercises = await this.getAllExercises();
-    return exercises.find(e => e.id === id) ?? null;
+    return exercises.find((e) => e.id === id) ?? null;
   }
 
   async searchExercises(query: string): Promise<Exercise[]> {
@@ -245,9 +250,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     }
 
     const lowerQuery = query.toLowerCase();
-    return exercises.filter(e =>
-      e.name.toLowerCase().includes(lowerQuery)
-    );
+    return exercises.filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }
 
   async createExercise(
@@ -272,7 +275,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     updates: Partial<Exercise>
   ): Promise<Exercise> {
     const exercises = await this.getAllExercises();
-    const index = exercises.findIndex(e => e.id === id);
+    const index = exercises.findIndex((e) => e.id === id);
 
     if (index === -1) {
       throw new Error(`Exercise not found: ${id}`);
@@ -282,7 +285,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
     if (!currentExercise) {
       throw new Error(`Exercise not found: ${id}`);
     }
-    
+
     const updatedExercise: Exercise = {
       ...currentExercise,
       ...updates,
@@ -298,7 +301,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
   async deleteExercise(id: string): Promise<void> {
     const exercises = await this.getAllExercises();
-    const filtered = exercises.filter(e => e.id !== id);
+    const filtered = exercises.filter((e) => e.id !== id);
 
     if (filtered.length === exercises.length) {
       throw new Error(`Exercise not found: ${id}`);
@@ -313,7 +316,7 @@ export class ExerciseLibraryStorage implements IExerciseLibraryStorage {
 
     // Find exercise by name and update lastUsed (only first match)
     let updated = false;
-    const result = exercises.map(e => {
+    const result = exercises.map((e) => {
       if (!updated && e.name.toLowerCase() === exerciseName.toLowerCase()) {
         updated = true;
         return { ...e, lastUsed: now };

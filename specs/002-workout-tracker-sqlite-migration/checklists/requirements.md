@@ -34,6 +34,7 @@
 **Status**: ✅ **PASSED**
 
 **Notes**:
+
 - This is an infrastructure/migration feature, so some technical references (SQLite, Capacitor, schema, indexes) are appropriate and necessary
 - The spec successfully documents the implemented functionality based on existing code
 - All user scenarios are independently testable

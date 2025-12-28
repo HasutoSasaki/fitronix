@@ -23,6 +23,7 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Description**: Cross-platform SQLite plugin for Capacitor, providing full relational database capabilities.
 
 **Pros**:
+
 - ✅ True relational model with foreign keys, joins, and constraints
 - ✅ Indexed queries 5-10x faster than JSON scans
 - ✅ SQLite is battle-tested, used in billions of devices
@@ -33,11 +34,13 @@ The application currently uses Capacitor Preferences for data persistence, which
 - ✅ Active maintenance (v7.0.2, updated November 2024)
 
 **Cons**:
+
 - ❌ Larger bundle size than Preferences (~150 KB)
 - ❌ Requires native build (cannot test in browser)
 - ❌ More complex API than simple key-value storage
 
 **Performance Benchmarks** (measured on iPhone 13, iOS 17):
+
 - Database initialization: 120ms (cold start)
 - Insert 100 sessions with 500 sets: 450ms
 - Query 100 sessions sorted by date: 35ms (with index)
@@ -52,11 +55,13 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Description**: Key-value storage using native platform storage (NSUserDefaults on iOS, SharedPreferences on Android).
 
 **Pros**:
+
 - ✅ Simple API (`get`, `set`, `remove`)
 - ✅ Small bundle size (~10 KB)
 - ✅ Works in browser for development
 
 **Cons**:
+
 - ❌ No relational model - must manually manage relationships
 - ❌ No indexing - full JSON scans for every query
 - ❌ No foreign key constraints - risk of orphaned data
@@ -72,11 +77,13 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Description**: Browser-based NoSQL database, accessible via Capacitor's web layer.
 
 **Pros**:
+
 - ✅ Works in browser for development
 - ✅ Indexes for query performance
 - ✅ Transaction support
 
 **Cons**:
+
 - ❌ Less mature on mobile platforms
 - ❌ No native performance benefits (runs in WebView)
 - ❌ Complex API (promises, cursors, object stores)
@@ -91,11 +98,13 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Description**: Mobile-first object database with sync capabilities.
 
 **Pros**:
+
 - ✅ Object-oriented API (no SQL)
 - ✅ Real-time sync with Realm Cloud (future-proof)
 - ✅ Good performance
 
 **Cons**:
+
 - ❌ Large bundle size (~5 MB)
 - ❌ Overkill for single-user offline app
 - ❌ Requires cloud subscription for sync features
@@ -110,10 +119,12 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Description**: Cloud NoSQL database with offline support.
 
 **Pros**:
+
 - ✅ Real-time sync across devices
 - ✅ Offline persistence layer
 
 **Cons**:
+
 - ❌ Requires network connection for initial sync
 - ❌ Not truly offline-first
 - ❌ Adds Firebase SDK dependency (~200 KB)
@@ -128,6 +139,7 @@ The application currently uses Capacitor Preferences for data persistence, which
 **Selected**: @capacitor-community/sqlite
 
 **Rationale**:
+
 1. **Relational Integrity**: Foreign keys prevent orphaned data (critical for session → exercise → set hierarchy)
 2. **Query Performance**: Indexed queries scale well to 1000+ sessions
 3. **Proven Technology**: SQLite is industry-standard, well-documented, stable
@@ -147,6 +159,7 @@ How should we structure the SQLite schema to balance normalization (data integri
 #### Option A: Fully Normalized Schema
 
 **Structure**:
+
 ```sql
 workout_sessions (id, date, totalTime, createdAt, updatedAt)
 workout_exercises (id, sessionId, exerciseId, order)  -- Foreign keys only
@@ -155,10 +168,12 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 ```
 
 **Pros**:
+
 - ✅ Maximum data integrity (DRY)
 - ✅ No redundancy
 
 **Cons**:
+
 - ❌ Every query requires joins (session → exercise → library)
 - ❌ Joins hurt performance on mobile devices
 - ❌ Complex queries for simple "show session history"
@@ -170,6 +185,7 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 #### Option B: Denormalized Schema ⭐ **SELECTED**
 
 **Structure**:
+
 ```sql
 workout_sessions (id, date, totalTime, createdAt, updatedAt)
 workout_exercises (
@@ -187,6 +203,7 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 ```
 
 **Pros**:
+
 - ✅ Fast reads - no joins required for "show session history"
 - ✅ exerciseName and bodyPart stored directly in workout_exercises
 - ✅ Maintains referential integrity: sessionId (CASCADE), exerciseId (SET NULL)
@@ -194,12 +211,14 @@ exercises (id, name, bodyPart, videoUrl, createdAt, lastUsed)
 - ✅ Denormalization limited to frequently-read fields
 
 **Cons**:
+
 - ❌ Some data redundancy (exerciseName, bodyPart duplicated)
 - ❌ Update complexity if exercise library name changes
 
 **Why Selected**: Read-heavy workload (users view history 10x more than they edit library). Denormalization optimizes for the common case.
 
 **Trade-off Justification**:
+
 - **Read-to-Write Ratio**: Users view history far more than they update exercise library
 - **Update Frequency**: Exercise names rarely change (e.g., "Bench Press" is permanent)
 - **Performance Gain**: Avoiding joins provides 3-5x faster query performance on mobile devices
@@ -249,12 +268,14 @@ Which indexes should we create to optimize common query patterns without over-in
 ### Decision: 7 Targeted Indexes
 
 **Rationale**:
+
 - **Not Too Many**: 7 indexes is reasonable (each index adds ~10% write overhead)
 - **Covers All Query Patterns**: Every query in the app benefits from at least one index
 - **COLLATE NOCASE**: Case-insensitive matching for ASCII/English only (e.g., "Bench Press" matches "bench press"). Japanese and other non-ASCII scripts have no case concept and are compared as-is.
 - **DESC Ordering**: Explicit DESC for date-based indexes (most recent first)
 
 **Index Effectiveness Verification**:
+
 - Use `EXPLAIN QUERY PLAN` to confirm indexes are used
 - Measure query performance with 100+ sessions (target: < 2 seconds)
 
@@ -271,6 +292,7 @@ How should we test the SQLite migration to ensure correctness and performance?
 ### Approach Selected: Contract-First Testing ⭐ **SELECTED**
 
 **Strategy**:
+
 1. **Define Contracts**: TypeScript interfaces for `IWorkoutSessionStorage`, `IExerciseLibraryStorage`, `IPreferencesStorage`
 2. **Write Contract Tests**: Tests that verify expected behavior (T024-T027)
 3. **Run Tests (Red Phase)**: Tests fail because implementation doesn't exist yet
@@ -278,10 +300,12 @@ How should we test the SQLite migration to ensure correctness and performance?
 5. **Refactor**: Improve code quality while keeping tests green (T031-T032)
 
 **Test Database**: Use `:memory:` for fast, isolated tests
+
 - **Pros**: No file I/O, tests run in < 5 seconds
 - **Cons**: Doesn't test file-based persistence (acceptable for contract tests)
 
 **Contract Test Coverage**:
+
 - `getAllSessions()`: Returns all sessions sorted by date DESC
 - `getSessionById(id)`: Returns single session or null
 - `getSessionsByDateRange(start, end)`: Filter by date range
@@ -291,11 +315,13 @@ How should we test the SQLite migration to ensure correctness and performance?
 - `getPreviousMaxWeight(exerciseName)`: Calculate max from history
 
 **Why Selected**:
+
 - Aligns with constitution's TDD requirement
 - Contract tests serve as living documentation
 - Real implementation (not mocks) catches actual database errors
 
 **Alternative Rejected**: Mock-based unit tests
+
 - **Why**: Mocks don't catch SQL syntax errors, constraint violations, or index performance issues
 
 **Decision**: ✅ **SELECTED** - Contract-first TDD with in-memory database.
@@ -311,12 +337,14 @@ How should we handle database errors to maintain data integrity and user trust?
 ### Approach Selected: Fail-Fast with Descriptive Errors ⭐ **SELECTED**
 
 **Principles**:
+
 1. **No Silent Failures**: Every database error is logged and thrown
 2. **Fail-Fast**: Don't continue execution with corrupt data
 3. **Descriptive Messages**: Include context (table name, operation, input data)
 4. **User-Facing Errors**: Translate technical errors to Japanese user messages (future work)
 
 **Implementation**:
+
 ```typescript
 try {
   await this.db.execute(CREATE_TABLES_SQL);
@@ -327,10 +355,12 @@ try {
 ```
 
 **Concurrency Protection**:
+
 - Use `initializationPromise` to prevent duplicate initialization
 - First caller triggers initialization, subsequent callers wait on promise
 
 **Alternative Rejected**: Silent fallbacks with default values
+
 - **Why**: Hides bugs, violates constitution's "Error Prevention" principle
 - **Example**: If `createSession()` fails, don't return an empty session - throw error
 
@@ -345,11 +375,13 @@ try {
 **Pattern**: `ON DELETE CASCADE`
 
 **Rationale**:
+
 - Deleting a session automatically deletes all exercises and sets
 - Prevents orphaned data (exercises without session, sets without exercise)
 - Enforced by database, not application logic (more reliable)
 
 **Example**:
+
 ```sql
 FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 ```
@@ -359,6 +391,7 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 **Pattern**: `CHECK(weight >= 0)`, `CHECK(reps >= 1)`
 
 **Rationale**:
+
 - Enforces business rules at database level
 - Impossible to insert invalid data (e.g., negative weight)
 - Fails fast if application logic has a bug
@@ -368,6 +401,7 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 **Pattern**: Generate UUIDs in application, not auto-increment
 
 **Rationale**:
+
 - Supports future distributed systems (no ID collision)
 - Predictable ID format for testing
 - No database round-trip to get generated ID
@@ -377,6 +411,7 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 **Pattern**: Store all dates as ISO 8601 strings (e.g., `2025-11-29T10:00:00.000Z`)
 
 **Rationale**:
+
 - Cross-platform compatible (iOS, Android, web)
 - Timezone-aware (UTC)
 - Human-readable in database inspector tools
@@ -388,10 +423,12 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 ### Database File Size Estimates
 
 **Assumptions**:
+
 - Average session: 3 exercises, 12 sets total
 - 1000 sessions over 2 years
 
 **Estimated Size**:
+
 - workout_sessions: 1000 rows × 100 bytes = 100 KB
 - workout_exercises: 3000 rows × 150 bytes = 450 KB
 - sets: 12000 rows × 80 bytes = 960 KB
@@ -401,10 +438,12 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 ### Index Overhead
 
 **Write Performance Impact**:
+
 - 7 indexes × ~10% overhead per index = ~70% slower writes
 - Acceptable because app is read-heavy (10:1 read:write ratio)
 
 **Storage Impact**:
+
 - Indexes add ~20-30% to database file size
 - 1.5 MB data + 0.4 MB indexes = ~2 MB total (acceptable)
 
@@ -417,6 +456,7 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 **Future**: If users have data in Preferences, migrate to SQLite
 
 **Approach**:
+
 1. Detect Preferences data on first launch
 2. Parse JSON workout sessions
 3. Insert into SQLite with transaction
@@ -430,6 +470,7 @@ FOREIGN KEY (sessionId) REFERENCES workout_sessions(id) ON DELETE CASCADE
 ## Conclusion
 
 The @capacitor-community/sqlite migration provides a solid foundation for the Fitronix Workout Tracker's data layer, with:
+
 - ✅ Relational integrity via foreign keys and constraints
 - ✅ Query performance via strategic denormalization and indexing
 - ✅ Schema versioning for future migrations

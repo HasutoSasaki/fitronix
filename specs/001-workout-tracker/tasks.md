@@ -63,17 +63,20 @@
 ### Storage Layer (Foundation - TDD)
 
 **Red Phase**:
+
 - [ ] T024 [P] Contract test for IPreferencesStorage.get in tests/contract/storage/preferences.test.ts
 - [ ] T025 [P] Contract test for IPreferencesStorage.set in tests/contract/storage/preferences.test.ts
 - [ ] T026 [P] Contract test for IWorkoutSessionStorage in tests/contract/storage/workout-sessions.test.ts
 - [ ] T027 [P] Contract test for IExerciseLibraryStorage in tests/contract/storage/exercise-library.test.ts
 
 **Green Phase**:
+
 - [ ] T028 Implement PreferencesStorage in src/services/storage.ts (仮実装 - make T024-T025 pass)
 - [ ] T029 Implement WorkoutSessionStorage in src/services/storage.ts (仮実装 - make T026 pass)
 - [ ] T030 Implement ExerciseLibraryStorage in src/services/storage.ts (仮実装 - make T027 pass)
 
 **Refactor Phase**:
+
 - [ ] T031 Refactor storage implementations with proper error handling and validation
 - [ ] T032 Add storage utility functions in src/utils/storage.ts
 
@@ -145,18 +148,22 @@
 ### Implementation for User Story 1 (Green Phase)
 
 **Zustand Store**:
+
 - [ ] T057 [P] [US1] Create workoutStore in src/stores/workoutStore.ts (仮実装 - minimal state)
 
 **Custom Hooks**:
+
 - [ ] T058 [P] [US1] Implement useWorkoutStorage hook in src/hooks/useWorkoutStorage.ts (三角測量)
 - [ ] T059 [US1] Implement useActiveWorkout hook in src/hooks/useActiveWorkout.ts (依存: T057, T058)
 
 **Business Logic**:
+
 - [ ] T060 [P] [US1] Implement calculateMaxWeight in src/services/calculations.ts
 - [ ] T061 [P] [US1] Implement date/time utilities in src/utils/date.ts
 - [ ] T062 [P] [US1] Implement validation helpers in src/utils/validation.ts
 
 **UI Components**:
+
 - [ ] T063 [P] [US1] Create SetRow component in src/components/workout/SetRow.tsx
 - [ ] T064 [US1] Create SetInput component in src/components/workout/SetInput.tsx (依存: T063)
 - [ ] T065 [P] [US1] Create ExerciseInput component in src/components/workout/ExerciseInput.tsx
@@ -164,6 +171,7 @@
 - [ ] T067 [US1] Connect WorkoutRecordingScreen to RecordScreen placeholder from T045
 
 **Data Persistence**:
+
 - [ ] T068 [US1] Integrate useWorkoutStorage with Capacitor Preferences API
 - [ ] T069 [US1] Test data persistence across app restart (manual iOS/Android simulator test)
 
@@ -195,15 +203,18 @@
 ### Implementation for User Story 2 (Green Phase)
 
 **Custom Hook**:
+
 - [ ] T079 [P] [US2] Implement useKeypad hook in src/hooks/useKeypad.ts (仮実装)
 
 **UI Components**:
+
 - [ ] T080 [P] [US2] Create QuickButtons component in src/components/keypad/QuickButtons.tsx (仮実装)
 - [ ] T081 [US2] Create NumericKeypad component in src/components/keypad/NumericKeypad.tsx (依存: T080)
 - [ ] T082 [US2] Integrate NumericKeypad with SetInput component (update T064)
 - [ ] T083 [US2] Add keypad open/close logic with useKeypad hook
 
 **Touch Target Compliance**:
+
 - [ ] T084 [US2] Ensure all keypad buttons are 60x60dp (exceeds WCAG 2.1 AA 44x44dp minimum)
 - [ ] T085 [US2] Add visual feedback for button presses (active state styling)
 
@@ -235,22 +246,27 @@
 ### Implementation for User Story 3 (Green Phase)
 
 **Zustand Store**:
+
 - [ ] T095 [P] [US3] Create timerStore in src/stores/timerStore.ts (仮実装)
 
 **Services**:
+
 - [ ] T096 [P] [US3] Implement TimerNotificationManager in src/services/notifications.ts (仮実装)
 
 **Custom Hooks**:
+
 - [ ] T097 [P] [US3] Implement useNotifications hook in src/hooks/useNotifications.ts (三角測量)
 - [ ] T098 [US3] Implement useTimer hook in src/hooks/useTimer.ts (依存: T095, T097)
 
 **UI Components**:
+
 - [ ] T099 [P] [US3] Create TimerDisplay component in src/components/timer/TimerDisplay.tsx
 - [ ] T100 [P] [US3] Create TimerPresetSelector component in src/components/timer/TimerPresetSelector.tsx
 - [ ] T101 [US3] Create RestTimer component in src/components/timer/RestTimer.tsx (依存: T099, T100)
 - [ ] T102 [US3] Integrate RestTimer into WorkoutRecordingScreen (update T066)
 
 **Lock Screen Integration**:
+
 - [ ] T103 [US3] Request notification permissions on timer first use
 - [ ] T104 [US3] Schedule ongoing notification with pause/resume/skip actions
 - [ ] T105 [US3] Listen to notification action events (pause, resume, skip)
@@ -284,6 +300,7 @@
 ### Implementation for User Story 4 (Green Phase)
 
 **UI Components**:
+
 - [ ] T116 [P] [US4] Create HistoryItem component in src/components/history/HistoryItem.tsx (仮実装)
 - [ ] T117 [P] [US4] Create ExerciseDetailCard component in src/components/history/ExerciseDetailCard.tsx (仮実装)
 - [ ] T118 [US4] Implement HistoryListScreen in src/components/history/HistoryListScreen.tsx (依存: T116)
@@ -291,10 +308,12 @@
 - [ ] T120 [US4] Implement WorkoutDetailScreen in src/components/history/WorkoutDetailScreen.tsx (依存: T117)
 
 **Virtualization**:
+
 - [ ] T121 [US4] Integrate react-window FixedSizeList in HistoryListScreen for 100+ sessions
 - [ ] T122 [US4] Optimize list item height for consistent scrolling
 
 **Workout Reuse**:
+
 - [ ] T123 [US4] Add "このメニューを再利用" button in WorkoutDetailScreen
 - [ ] T124 [US4] Implement reuse logic to populate activeWorkout from history session
 - [ ] T125 [US4] Navigate to RecordScreen with pre-filled exercises
@@ -326,12 +345,15 @@
 ### Implementation for User Story 5 (Green Phase)
 
 **Zustand Store**:
+
 - [ ] T134 [P] [US5] Create libraryStore in src/stores/libraryStore.ts (仮実装)
 
 **Custom Hook**:
+
 - [ ] T135 [US5] Implement useExerciseLibrary hook in src/hooks/useExerciseLibrary.ts (依存: T134)
 
 **UI Components**:
+
 - [ ] T136 [P] [US5] Create BodyPartFilter component in src/components/library/BodyPartFilter.tsx (仮実装)
 - [ ] T137 [P] [US5] Create ExerciseCard component in src/components/library/ExerciseCard.tsx (仮実装)
 - [ ] T138 [P] [US5] Create ExerciseForm component in src/components/library/ExerciseForm.tsx (仮実装)
@@ -339,12 +361,14 @@
 - [ ] T140 [US5] Connect ExerciseLibraryScreen to LibraryScreen placeholder from T047
 
 **CRUD Operations**:
+
 - [ ] T141 [US5] Implement create exercise flow (modal with ExerciseForm)
 - [ ] T142 [US5] Implement edit exercise flow (pre-fill form with existing data)
 - [ ] T143 [US5] Implement delete exercise flow (confirmation modal)
 - [ ] T144 [US5] Add body part filter logic (filter exercises by selected body part)
 
 **Library Integration with Workout Recording**:
+
 - [ ] T145 [US5] Update ExerciseInput (T065) to suggest exercises from library
 - [ ] T146 [US5] Add "Add to Library" button when entering new exercise name
 - [ ] T147 [US5] Update lastUsed timestamp when exercise is used in workout
