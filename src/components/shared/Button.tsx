@@ -62,24 +62,18 @@ export function Button({
     },
   };
 
-  const getBackgroundColor = () => {
+  const getBackgroundColor = (): string => {
     if (variant === 'text') return 'transparent';
     if (disabled) {
-      return variantStyles[variant].backgroundColor as string;
+      return (variantStyles[variant].backgroundColor as string) || '';
     }
     if (isHovered) {
-      switch (variant) {
-        case 'primary':
-          return theme.colors.primaryHover;
-        case 'secondary':
-          return theme.colors.secondaryHover;
-        case 'danger':
-          return theme.colors.dangerHover;
-        default:
-          return variantStyles[variant].backgroundColor as string;
-      }
+      if (variant === 'primary') return theme.colors.primaryHover;
+      if (variant === 'secondary') return theme.colors.secondaryHover;
+      // At this point, variant must be 'danger' (since 'text' is handled above)
+      return theme.colors.dangerHover;
     }
-    return variantStyles[variant].backgroundColor as string;
+    return (variantStyles[variant].backgroundColor as string) || '';
   };
 
   const baseStyle: CSSProperties = {
