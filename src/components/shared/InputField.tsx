@@ -3,7 +3,7 @@
  * Shared input component with dark theme styling
  */
 
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import { theme } from '../../styles/theme';
 
 export interface InputFieldProps {
@@ -27,13 +27,18 @@ export function InputField({
   disabled = false,
   'aria-label': ariaLabel,
 }: InputFieldProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
   const baseStyle: CSSProperties = {
     width: '100%',
     padding: `${theme.spacing.md} ${theme.spacing.md}`,
     fontSize: theme.fontSize.md,
     color: theme.colors.textPrimary,
-    backgroundColor: theme.colors.inputBackground,
-    border: `1px solid ${theme.colors.border}`,
+    backgroundColor:
+      isFocused && !disabled
+        ? theme.colors.inputBackgroundFocus
+        : theme.colors.inputBackground,
+    border: `1px solid ${isFocused && !disabled ? theme.colors.borderFocus : theme.colors.border}`,
     borderRadius: theme.borderRadius.md,
     outline: 'none',
     transition: theme.transitions.fast,
@@ -50,17 +55,17 @@ export function InputField({
       }
     : {};
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.backgroundColor = theme.colors.inputBackgroundFocus;
-    e.currentTarget.style.borderColor = theme.colors.borderFocus;
+  const handleFocus = () => {
+    if (disabled) return;
+    setIsFocused(true);
     if (onFocus) {
       onFocus();
     }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.backgroundColor = theme.colors.inputBackground;
-    e.currentTarget.style.borderColor = theme.colors.border;
+  const handleBlur = () => {
+    if (disabled) return;
+    setIsFocused(false);
     if (onBlur) {
       onBlur();
     }

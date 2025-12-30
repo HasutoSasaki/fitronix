@@ -35,12 +35,12 @@ export function LoadingSpinner({
     border: `4px solid ${theme.colors.border}`,
     borderTop: `4px solid ${theme.colors.primary}`,
     borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
+    animation: 'loadingSpinnerSpin 1s linear infinite',
   };
 
   // Inject keyframes for spinner animation
   const styleTag = `
-    @keyframes spin {
+    @keyframes loadingSpinnerSpin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }

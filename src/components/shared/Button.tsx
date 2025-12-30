@@ -4,7 +4,7 @@
  * WCAG 2.1 AA: Minimum touch target 44x44dp
  */
 
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import { theme } from '../../styles/theme';
 
 export interface ButtonProps {
@@ -24,21 +24,7 @@ export function Button({
   children,
   'aria-label': ariaLabel,
 }: ButtonProps) {
-  const baseStyle: CSSProperties = {
-    border: 'none',
-    borderRadius: theme.borderRadius.md,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    fontWeight: '600',
-    transition: theme.transitions.fast,
-    opacity: disabled ? 0.5 : 1,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    // WCAG 2.1 AA: Minimum touch target
-    minWidth: theme.touchTarget.minWidth,
-    minHeight: theme.touchTarget.minHeight,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
+  const [isHovered, setIsHovered] = useState(false);
 
   const variantStyles: Record<ButtonProps['variant'], CSSProperties> = {
     primary: {
@@ -76,35 +62,58 @@ export function Button({
     },
   };
 
+  const getBackgroundColor = () => {
+    if (variant === 'text') return 'transparent';
+    if (disabled) {
+      return variantStyles[variant].backgroundColor as string;
+    }
+    if (isHovered) {
+      switch (variant) {
+        case 'primary':
+          return theme.colors.primaryHover;
+        case 'secondary':
+          return theme.colors.secondaryHover;
+        case 'danger':
+          return theme.colors.dangerHover;
+        default:
+          return variantStyles[variant].backgroundColor as string;
+      }
+    }
+    return variantStyles[variant].backgroundColor as string;
+  };
+
+  const baseStyle: CSSProperties = {
+    border: 'none',
+    borderRadius: theme.borderRadius.md,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    fontWeight: '600',
+    transition: theme.transitions.fast,
+    opacity: disabled ? 0.5 : 1,
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    // WCAG 2.1 AA: Minimum touch target
+    minWidth: theme.touchTarget.minWidth,
+    minHeight: theme.touchTarget.minHeight,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: getBackgroundColor(),
+  };
+
   return (
     <button
       style={{
         ...baseStyle,
-        ...variantStyles[variant],
+        color: variantStyles[variant].color,
         ...sizeStyles[size],
       }}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor =
-            variant === 'primary'
-              ? theme.colors.primaryHover
-              : variant === 'secondary'
-                ? theme.colors.secondaryHover
-                : variant === 'danger'
-                  ? theme.colors.dangerHover
-                  : 'transparent';
-        }
+      onMouseEnter={() => {
+        if (!disabled) setIsHovered(true);
       }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor =
-            variant === 'text'
-              ? 'transparent'
-              : (variantStyles[variant].backgroundColor ?? '');
-        }
+      onMouseLeave={() => {
+        if (!disabled) setIsHovered(false);
       }}
     >
       {children}

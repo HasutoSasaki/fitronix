@@ -59,12 +59,7 @@ export function EmptyState({
       <h3 style={titleStyle}>{title}</h3>
       <p style={descriptionStyle}>{description}</p>
       {action && (
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={action.onClick}
-          aria-label={action.label}
-        >
+        <Button variant="primary" size="medium" onClick={action.onClick}>
           {action.label}
         </Button>
       )}
